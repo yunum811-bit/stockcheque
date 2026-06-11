@@ -1,0 +1,1216 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Stock Cheque - Serial Factoring</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary-green: #1b5e20;
+      --primary-green-light: #2e7d32;
+      --primary-yellow: #f9a825;
+      --primary-yellow-light: #fbc02d;
+      --gradient-main: linear-gradient(135deg, #1b5e20 0%, #2e7d32 40%, #558b2f 70%, #f9a825 100%);
+      --gradient-soft: linear-gradient(135deg, #e8f5e9 0%, #fffde7 100%);
+      --gradient-card: linear-gradient(180deg, #ffffff 0%, #f1f8e9 100%);
+      --shadow-sm: 0 2px 8px rgba(27,94,32,.08);
+      --shadow-md: 0 4px 16px rgba(27,94,32,.12);
+      --shadow-lg: 0 8px 32px rgba(27,94,32,.15);
+      --radius: 14px;
+      --radius-sm: 8px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      background: var(--gradient-soft);
+      font-family: 'Prompt', 'Segoe UI', Tahoma, sans-serif;
+      font-size: 14px;
+      font-weight: 400;
+      color: #2d3436;
+      min-height: 100vh;
+    }
+
+    /* ===== Navbar ===== */
+    .navbar {
+      background: var(--gradient-main) !important;
+      padding: 0.8rem 1.5rem;
+      box-shadow: var(--shadow-lg);
+      border-bottom: 3px solid var(--primary-yellow);
+    }
+    .navbar-brand {
+      font-weight: 600;
+      font-size: 1.2rem;
+      letter-spacing: 0.3px;
+    }
+    .navbar .company-name {
+      font-size: 0.78rem;
+      font-weight: 300;
+      opacity: 0.9;
+      display: block;
+      margin-top: 2px;
+    }
+
+    /* ===== Cards ===== */
+    .card {
+      border: none;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-sm);
+      background: var(--gradient-card);
+      transition: box-shadow 0.2s, transform 0.2s;
+    }
+    .card:hover {
+      box-shadow: var(--shadow-md);
+    }
+    .card-header {
+      border-radius: var(--radius) var(--radius) 0 0 !important;
+      font-weight: 500;
+      border-bottom: none;
+    }
+
+    /* ===== Stat Cards ===== */
+    .stat-card {
+      border-left: 4px solid var(--primary-green);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .stat-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-lg);
+    }
+    .stat-card .card-title {
+      font-weight: 600;
+      font-size: 0.95rem;
+      color: var(--primary-green);
+    }
+
+    /* ===== Nav Pills ===== */
+    .nav-pills .nav-link {
+      color: var(--primary-green);
+      font-weight: 500;
+      font-size: 0.9rem;
+      border-radius: 25px;
+      padding: 0.5rem 1.2rem;
+      margin-right: 0.4rem;
+      transition: all 0.2s;
+    }
+    .nav-pills .nav-link:hover {
+      background: rgba(27,94,32,.08);
+      color: var(--primary-green);
+    }
+    .nav-pills .nav-link.active {
+      background: var(--gradient-main);
+      color: #fff;
+      box-shadow: 0 3px 12px rgba(27,94,32,.25);
+    }
+
+    /* ===== Badges ===== */
+    .badge-available { background: #43a047; color: #fff; }
+    .badge-issued { background: #1976d2; color: #fff; }
+    .badge-voided { background: #ef6c00; color: #fff; }
+    .badge-cancelled { background: #c62828; color: #fff; }
+
+    /* ===== Table ===== */
+    .table {
+      font-size: 0.85rem;
+    }
+    .table th {
+      font-weight: 600;
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--primary-green);
+      border-bottom: 2px solid #c8e6c9;
+      padding: 0.7rem 0.5rem;
+    }
+    .table td {
+      padding: 0.6rem 0.5rem;
+      vertical-align: middle;
+    }
+    .table-hover tbody tr:hover {
+      background: rgba(200,230,201,.25);
+    }
+
+    /* ===== Buttons ===== */
+    .btn-primary-green {
+      background: var(--gradient-main);
+      color: #fff;
+      border: none;
+      font-weight: 500;
+      border-radius: var(--radius-sm);
+      box-shadow: 0 2px 8px rgba(27,94,32,.2);
+      transition: all 0.2s;
+    }
+    .btn-primary-green:hover {
+      background: linear-gradient(135deg, #2e7d32 0%, #558b2f 50%, #f9a825 100%);
+      color: #fff;
+      box-shadow: 0 4px 16px rgba(27,94,32,.3);
+      transform: translateY(-1px);
+    }
+    .btn-bbl {
+      background: var(--gradient-main);
+      color: #fff;
+      border: none;
+      font-weight: 500;
+      border-radius: var(--radius-sm);
+    }
+    .btn-bbl:hover {
+      background: linear-gradient(135deg, #2e7d32 0%, #558b2f 50%, #f9a825 100%);
+      color: #fff;
+      transform: translateY(-1px);
+    }
+    .btn-uob { background: #003d6b; color: #fff; }
+    .btn-uob:hover { background: #00507d; color: #fff; }
+
+    .btn-outline-primary {
+      border-color: var(--primary-green);
+      color: var(--primary-green);
+    }
+    .btn-outline-primary:hover {
+      background: var(--primary-green);
+      border-color: var(--primary-green);
+      color: #fff;
+    }
+
+    /* ===== Forms ===== */
+    .form-control, .form-select {
+      border-radius: var(--radius-sm);
+      border: 1.5px solid #c8e6c9;
+      font-size: 0.88rem;
+      padding: 0.5rem 0.75rem;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .form-control:focus, .form-select:focus {
+      border-color: var(--primary-green-light);
+      box-shadow: 0 0 0 3px rgba(46,125,50,.12);
+    }
+    .form-label {
+      font-size: 0.82rem;
+      font-weight: 500;
+      color: #555;
+      margin-bottom: 0.3rem;
+    }
+
+    /* ===== Modals ===== */
+    .modal-content {
+      border-radius: var(--radius);
+      border: none;
+      box-shadow: var(--shadow-lg);
+    }
+    .modal-header {
+      background: var(--gradient-main);
+      color: #fff;
+      border-radius: var(--radius) var(--radius) 0 0;
+      border-bottom: 3px solid var(--primary-yellow);
+    }
+    .modal-header .btn-close {
+      filter: brightness(0) invert(1);
+    }
+    .modal-title {
+      font-weight: 600;
+      font-size: 1rem;
+    }
+    .modal-footer {
+      border-top: 1px solid #e8f5e9;
+    }
+
+    /* ===== Card Headers ===== */
+    .card-header.bg-primary {
+      background: var(--gradient-main) !important;
+      border-bottom: 2px solid var(--primary-yellow);
+    }
+    .card-header.bg-secondary {
+      background: linear-gradient(135deg, #37474f, #455a64) !important;
+    }
+
+    /* ===== Scrollbar ===== */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: #f1f8e9; }
+    ::-webkit-scrollbar-thumb { background: #a5d6a7; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #66bb6a; }
+
+    /* ===== Misc ===== */
+    hr { border-color: #c8e6c9; opacity: 0.5; }
+    .text-muted { color: #78909c !important; }
+    .fw-bold { font-weight: 600 !important; }
+
+    /* ===== Print Preview ===== */
+    #payinPreview, .payin-preview-box {
+      font-family: 'Courier New', monospace;
+      font-size: 11px;
+      line-height: 1.5;
+      white-space: pre;
+      overflow-x: auto;
+      background: #fff;
+      border: 1.5px solid #c8e6c9;
+      border-radius: var(--radius-sm);
+      padding: 15px;
+      min-height: 300px;
+    }
+
+    /* ===== Footer Tag ===== */
+    .brand-footer {
+      text-align: center;
+      font-size: 0.72rem;
+      color: #999;
+      padding: 1.5rem 0 1rem;
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar navbar-dark mb-4">
+    <div class="container-fluid">
+      <span class="navbar-brand mb-0">
+        <i class="bi bi-journal-check"></i> Stock Cheque - บัญชีควบคุม
+        <span class="company-name">บริษัท ซีเรียล แฟคตอริ่ง (ประเทศไทย) จำกัด</span>
+      </span>
+    </div>
+  </nav>
+
+  <div class="container-fluid px-4">
+    <!-- Navigation Tabs -->
+    <ul class="nav nav-pills mb-4" id="mainTabs">
+      <li class="nav-item">
+        <a class="nav-link active" href="#" onclick="showTab('dashboard')">
+          <i class="bi bi-speedometer2"></i> Dashboard
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="#" onclick="showTab('cheques')">
+          <i class="bi bi-card-list"></i> Stock Cheque
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="#" onclick="showTab('transactions')">
+          <i class="bi bi-clock-history"></i> ประวัติเบิกจ่าย
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="#" onclick="showTab('payin')">
+          <i class="bi bi-receipt"></i> พิมพ์ใบ Pay-in
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="#" onclick="showTab('settings')">
+          <i class="bi bi-gear"></i> ตั้งค่า
+        </a>
+      </li>
+    </ul>
+
+    <!-- Dashboard Tab -->
+    <div id="tab-dashboard">
+      <div class="row g-3 mb-4" id="statsContainer"></div>
+      <div class="row g-4">
+        <div class="col-lg-6">
+          <div class="card">
+            <div class="card-body">
+              <h6 class="fw-bold mb-3"><i class="bi bi-pie-chart"></i> สัดส่วนสถานะเช็ค (ทั้งหมด)</h6>
+              <canvas id="chartStatus" height="250"></canvas>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-6">
+          <div class="card">
+            <div class="card-body">
+              <h6 class="fw-bold mb-3"><i class="bi bi-bar-chart"></i> จำนวนเช็คแยกตามธนาคาร</h6>
+              <canvas id="chartBank" height="250"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="row g-4 mt-2">
+        <div class="col-12">
+          <div class="card">
+            <div class="card-body">
+              <h6 class="fw-bold mb-3"><i class="bi bi-graph-up"></i> ยอดเบิกจ่ายรายเดือน (6 เดือนล่าสุด)</h6>
+              <canvas id="chartMonthly" height="120"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Cheques Tab -->
+    <div id="tab-cheques" style="display:none;">
+      <div class="card mb-4">
+        <div class="card-body">
+          <div class="row g-2 align-items-end">
+            <div class="col-md-3">
+              <label class="form-label">ธนาคาร</label>
+              <select id="filterBank" class="form-select" onchange="loadCheques()">
+                <option value="">ทั้งหมด</option>
+              </select>
+            </div>
+            <div class="col-md-2">
+              <label class="form-label">สถานะ</label>
+              <select id="filterStatus" class="form-select" onchange="loadCheques()">
+                <option value="">ทั้งหมด</option>
+                <option value="available">พร้อมใช้</option>
+                <option value="issued">เบิกจ่ายแล้ว</option>
+                <option value="voided">ยกเลิก (Void)</option>
+                <option value="cancelled">ยกเลิก (Cancel)</option>
+              </select>
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">ค้นหา</label>
+              <input type="text" id="filterSearch" class="form-control" placeholder="เลขที่เช็ค / เล่ม" onkeyup="loadCheques()">
+            </div>
+            <div class="col-md-4 text-end">
+              <button class="btn btn-bbl" onclick="showAddChequeModal()">
+                <i class="bi bi-plus-lg"></i> เพิ่มเช็ค
+              </button>
+              <button class="btn btn-outline-primary" onclick="showBulkAddModal()">
+                <i class="bi bi-layers"></i> เพิ่มทั้งเล่ม
+              </button>
+              <button class="btn btn-outline-secondary" onclick="printCheques()" title="พิมพ์ Dot Matrix">
+                <i class="bi bi-printer"></i> Print
+              </button>
+              <button class="btn btn-outline-success" onclick="exportChequesExcel()" title="Export Excel">
+                <i class="bi bi-file-earmark-spreadsheet"></i> Excel
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="table table-hover">
+              <thead>
+                <tr>
+                  <th>ธนาคาร</th>
+                  <th>ชื่อบัญชี</th>
+                  <th>เลขที่เช็ค</th>
+                  <th>เล่มที่</th>
+                  <th>สถานะ</th>
+                  <th>ผู้รับเงิน</th>
+                  <th>วันที่ลงทะเบียน</th>
+                  <th>หมายเหตุ</th>
+                  <th>จัดการ</th>
+                </tr>
+              </thead>
+              <tbody id="chequesTable"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Transactions Tab -->
+    <div id="tab-transactions" style="display:none;">
+      <div class="card mb-4">
+        <div class="card-body">
+          <div class="row g-2 align-items-end">
+            <div class="col-md-3">
+              <label class="form-label">ธนาคาร</label>
+              <select id="txFilterBank" class="form-select" onchange="loadTransactions()">
+                <option value="">ทั้งหมด</option>
+              </select>
+            </div>
+            <div class="col-md-2">
+              <label class="form-label">จากวันที่</label>
+              <input type="date" id="txFromDate" class="form-control" onchange="loadTransactions()">
+            </div>
+            <div class="col-md-2">
+              <label class="form-label">ถึงวันที่</label>
+              <input type="date" id="txToDate" class="form-control" onchange="loadTransactions()">
+            </div>
+            <div class="col-md-3 text-end align-self-end">
+              <button class="btn btn-outline-secondary" onclick="printTransactions()" title="พิมพ์ Dot Matrix">
+                <i class="bi bi-printer"></i> Print
+              </button>
+              <button class="btn btn-outline-success" onclick="exportTransactionsExcel()" title="Export Excel">
+                <i class="bi bi-file-earmark-spreadsheet"></i> Excel
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="table table-hover">
+              <thead>
+                <tr>
+                  <th>วันที่</th>
+                  <th>ธนาคาร</th>
+                  <th>ชื่อบัญชี</th>
+                  <th>เลขที่เช็ค</th>
+                  <th>ประเภท</th>
+                  <th>ผู้รับเงิน</th>
+                  <th>จำนวนเงิน</th>
+                  <th>รายละเอียด</th>
+                  <th>ผู้ทำรายการ</th>
+                </tr>
+              </thead>
+              <tbody id="transactionsTable"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    <!-- Transactions Tab content ends -->
+    </div>
+
+    <!-- Pay-in Tab -->
+    <div id="tab-payin" style="display:none;">
+      <!-- Sub-tabs for each bank -->
+      <ul class="nav nav-tabs mb-3" id="payinBankTabs">
+        <li class="nav-item">
+          <a class="nav-link active" href="#" onclick="showPayinBankTab('ktb')" style="color:#00a7e1; font-weight:600;">
+            <i class="bi bi-bank"></i> ธ.กรุงไทย (KTB)
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#" onclick="showPayinBankTab('uob')" style="color:#003d6b; font-weight:600;">
+            <i class="bi bi-bank2"></i> ธ.ยูโอบี (UOB)
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#" onclick="showPayinBankTab('bbl')" style="color:#1a237e; font-weight:600;">
+            <i class="bi bi-building"></i> ธ.กรุงเทพ (BBL)
+          </a>
+        </li>
+      </ul>
+
+      <!-- ============ KTB Pay-in Form ============ -->
+      <div id="payinTab-ktb" class="payin-bank-tab">
+        <div class="row g-4">
+          <div class="col-lg-7">
+            <div class="card" style="border-top:4px solid #00a7e1;">
+              <div class="card-header" style="background:linear-gradient(135deg,#00a7e1,#0087c3); color:#fff;">
+                <h6 class="mb-0"><i class="bi bi-bank"></i> ใบรับฝากเงิน - ธนาคารกรุงไทย (Deposit Slip)</h6>
+              </div>
+              <div class="card-body">
+                <div class="row">
+                  <div class="col-6 mb-3">
+                    <label class="form-label">สาขา (Branch)</label>
+                    <input type="text" id="ktb_branch" class="form-control">
+                  </div>
+                  <div class="col-6 mb-3">
+                    <label class="form-label">วันที่และเวลา (Date and Time)</label>
+                    <input type="date" id="ktb_date" class="form-control">
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-8 mb-3">
+                    <label class="form-label">ชื่อบัญชี (A/C Name)</label>
+                    <input type="text" id="ktb_accountName" class="form-control" value="บริษัท ซีเรียล แฟคตอริ่ง (ประเทศไทย) จำกัด">
+                  </div>
+                  <div class="col-4 mb-3">
+                    <label class="form-label">เลขที่บัญชี (A/C No.)</label>
+                    <input type="text" id="ktb_accountNo" class="form-control">
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-6 mb-3">
+                    <label class="form-label">ผู้นำฝาก / เบอร์โทร</label>
+                    <input type="text" id="ktb_depositor" class="form-control" placeholder="ชื่อ/เบอร์โทร">
+                  </div>
+                  <div class="col-6 mb-3">
+                    <label class="form-label">จำนวนเงิน (Amount)</label>
+                    <input type="number" id="ktb_amount" class="form-control" step="0.01">
+                  </div>
+                </div>
+                <hr>
+                <div class="row">
+                  <div class="col-4 mb-2">
+                    <label class="form-label form-label-sm">เลื่อนลง (mm)</label>
+                    <input type="number" id="ktb_offsetTop" class="form-control form-control-sm" value="0" step="0.5">
+                  </div>
+                  <div class="col-4 mb-2">
+                    <label class="form-label form-label-sm">เลื่อนขวา (mm)</label>
+                    <input type="number" id="ktb_offsetLeft" class="form-control form-control-sm" value="0" step="0.5">
+                  </div>
+                  <div class="col-4 mb-2">
+                    <label class="form-label form-label-sm">แนวกระดาษ</label>
+                    <select id="ktb_orientation" class="form-select form-select-sm">
+                      <option value="portrait">แนวตั้ง</option>
+                      <option value="landscape">แนวนอน</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="text-end mt-3">
+                  <button class="btn btn-outline-warning btn-sm" onclick="openKTBFieldAdjust()">
+                    <i class="bi bi-sliders"></i> ปรับทีละช่อง
+                  </button>
+                  <button class="btn btn-outline-info btn-sm" onclick="previewPayinKTB()">
+                    <i class="bi bi-eye"></i> ดูตัวอย่าง
+                  </button>
+                  <button class="btn btn-sm" style="background:#00a7e1; color:#fff;" onclick="printPayinKTB()">
+                    <i class="bi bi-printer"></i> พิมพ์ลงฟอร์ม
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-5">
+            <div class="card">
+              <div class="card-header bg-secondary text-white"><h6 class="mb-0"><i class="bi bi-file-text"></i> ตัวอย่าง KTB</h6></div>
+              <div class="card-body"><pre id="ktb_preview" class="payin-preview-box">กรอกข้อมูลแล้วกด "ดูตัวอย่าง"</pre></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============ UOB Pay-in Form ============ -->
+      <div id="payinTab-uob" class="payin-bank-tab" style="display:none;">
+        <div class="row g-4">
+          <div class="col-lg-7">
+            <div class="card" style="border-top:4px solid #003d6b;">
+              <div class="card-header" style="background:linear-gradient(135deg,#003d6b,#00507d); color:#fff;">
+                <h6 class="mb-0"><i class="bi bi-bank2"></i> ใบนำฝากเช็ค - ธนาคารยูโอบี (Cheque Deposit Slip)</h6>
+              </div>
+              <div class="card-body">
+                <div class="row">
+                  <div class="col-4 mb-3">
+                    <label class="form-label">วันที่ (Date)</label>
+                    <input type="date" id="uob_date" class="form-control">
+                  </div>
+                  <div class="col-4 mb-3">
+                    <label class="form-label">เพื่อสาขา (For Branch)</label>
+                    <input type="text" id="uob_branch" class="form-control">
+                  </div>
+                  <div class="col-4 mb-3">
+                    <label class="form-label">ประเภทบัญชี (A/C Type)</label>
+                    <select id="uob_accountType" class="form-select">
+                      <option value="ออมทรัพย์">ออมทรัพย์ (Savings)</option>
+                      <option value="กระแสรายวัน">กระแสรายวัน (Current)</option>
+                      <option value="ฝากประจำ">ฝากประจำ (Time Deposit)</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-6 mb-3">
+                    <label class="form-label">ชื่อบัญชี (A/C Name)</label>
+                    <input type="text" id="uob_accountName" class="form-control" value="บริษัท ซีเรียล แฟคตอริ่ง (ประเทศไทย) จำกัด">
+                  </div>
+                  <div class="col-6 mb-3">
+                    <label class="form-label">หมายเลขบัญชี (A/C No.)</label>
+                    <input type="text" id="uob_accountNo" class="form-control">
+                  </div>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">โดย (By)</label>
+                  <div class="row">
+                    <div class="col-6">
+                      <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="uob_chequeType" id="uob_typeUOB" value="UOB" checked>
+                        <label class="form-check-label" for="uob_typeUOB">เช็คธนาคารยูโอบี</label>
+                      </div>
+                    </div>
+                    <div class="col-6">
+                      <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="uob_chequeType" id="uob_typeClearing" value="Clearing">
+                        <label class="form-check-label" for="uob_typeClearing">เช็คต่างธนาคาร (Clearing)</label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <hr>
+                <h6 class="fw-bold">รายการเช็ค</h6>
+                <div id="uob_chequeItems">
+                  <div class="row g-2 mb-2 uob-cheque-row">
+                    <div class="col-4">
+                      <input type="text" class="form-control form-control-sm" placeholder="เช็คธนาคาร/สาขา" data-field="chqBank">
+                    </div>
+                    <div class="col-4">
+                      <input type="text" class="form-control form-control-sm" placeholder="เลขที่เช็ค (Cheque No.)" data-field="chqNo">
+                    </div>
+                    <div class="col-4">
+                      <input type="number" class="form-control form-control-sm" placeholder="จำนวนเงิน (Amount)" step="0.01" data-field="chqAmount">
+                    </div>
+                  </div>
+                </div>
+                <button class="btn btn-sm btn-outline-secondary mb-3" onclick="addUobChequeRow()">
+                  <i class="bi bi-plus"></i> เพิ่มรายการเช็ค
+                </button>
+                <hr>
+                <div class="row">
+                  <div class="col-6 mb-3">
+                    <label class="form-label">รวมจำนวนเงินเป็นตัวอักษร (Total Amount in Words)</label>
+                    <input type="text" id="uob_amountWords" class="form-control" readonly>
+                  </div>
+                  <div class="col-3 mb-3">
+                    <label class="form-label">รวมเงินฝาก (Total Amount)</label>
+                    <input type="number" id="uob_totalAmount" class="form-control" step="0.01" oninput="updateUobAmountWords()">
+                  </div>
+                  <div class="col-3 mb-3">
+                    <label class="form-label">ผู้ทำรายการ / โทร</label>
+                    <input type="text" id="uob_depositor" class="form-control" placeholder="ชื่อ / Tel.">
+                  </div>
+                </div>
+                <hr>
+                <div class="row">
+                  <div class="col-4 mb-2">
+                    <label class="form-label form-label-sm">เลื่อนลง (mm)</label>
+                    <input type="number" id="uob_offsetTop" class="form-control form-control-sm" value="0" step="0.5">
+                  </div>
+                  <div class="col-4 mb-2">
+                    <label class="form-label form-label-sm">เลื่อนขวา (mm)</label>
+                    <input type="number" id="uob_offsetLeft" class="form-control form-control-sm" value="0" step="0.5">
+                  </div>
+                  <div class="col-4 mb-2">
+                    <label class="form-label form-label-sm">แนวกระดาษ</label>
+                    <select id="uob_orientation" class="form-select form-select-sm">
+                      <option value="portrait">แนวตั้ง</option>
+                      <option value="landscape">แนวนอน</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="text-end mt-3">
+                  <button class="btn btn-outline-warning btn-sm" onclick="openUOBFieldAdjust()">
+                    <i class="bi bi-sliders"></i> ปรับทีละช่อง
+                  </button>
+                  <button class="btn btn-outline-info btn-sm" onclick="previewPayinUOB()">
+                    <i class="bi bi-eye"></i> ดูตัวอย่าง
+                  </button>
+                  <button class="btn btn-sm" style="background:#003d6b; color:#fff;" onclick="printPayinUOB()">
+                    <i class="bi bi-printer"></i> พิมพ์ลงฟอร์ม
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-5">
+            <div class="card">
+              <div class="card-header bg-secondary text-white"><h6 class="mb-0"><i class="bi bi-file-text"></i> ตัวอย่าง UOB</h6></div>
+              <div class="card-body"><pre id="uob_preview" class="payin-preview-box">กรอกข้อมูลแล้วกด "ดูตัวอย่าง"</pre></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============ BBL Pay-in Form ============ -->
+      <div id="payinTab-bbl" class="payin-bank-tab" style="display:none;">
+        <div class="row g-4">
+          <div class="col-lg-7">
+            <div class="card" style="border-top:4px solid #1a237e;">
+              <div class="card-header" style="background:linear-gradient(135deg,#1a237e,#283593); color:#fff;">
+                <h6 class="mb-0"><i class="bi bi-building"></i> ชุดฝากเช็ค - ธนาคารกรุงเทพ (Deposit Slip for Cheque)</h6>
+              </div>
+              <div class="card-body">
+                <div class="row">
+                  <div class="col-4 mb-3">
+                    <label class="form-label">สาขา (Branch)</label>
+                    <input type="text" id="bbl_branch" class="form-control">
+                  </div>
+                  <div class="col-4 mb-3">
+                    <label class="form-label">วันที่ (Date)</label>
+                    <input type="date" id="bbl_date" class="form-control">
+                  </div>
+                  <div class="col-4 mb-3">
+                    <label class="form-label">ประเภทบัญชี (A/C type)</label>
+                    <select id="bbl_accountType" class="form-select">
+                      <option value="ออมทรัพย์">ออมทรัพย์ (Savings)</option>
+                      <option value="กระแสรายวัน">กระแสรายวัน (Current)</option>
+                      <option value="สินมัธยะ">สินมัธยะ (Sinmataya)</option>
+                      <option value="ฝากประจำ">ฝากประจำ (Fixed)</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-6 mb-3">
+                    <label class="form-label">ผู้นำฝาก (Depositor's Name)</label>
+                    <input type="text" id="bbl_depositor" class="form-control">
+                  </div>
+                  <div class="col-6 mb-3">
+                    <label class="form-label">โทรศัพท์ (Tel. No.)</label>
+                    <input type="text" id="bbl_phone" class="form-control">
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-4 mb-3">
+                    <label class="form-label">เลขที่บัญชี (A/C No.)</label>
+                    <input type="text" id="bbl_accountNo" class="form-control">
+                  </div>
+                  <div class="col-4 mb-3">
+                    <label class="form-label">ชื่อบัญชี (A/C Name)</label>
+                    <input type="text" id="bbl_accountName" class="form-control" value="บริษัท ซีเรียล แฟคตอริ่ง (ประเทศไทย) จำกัด">
+                  </div>
+                  <div class="col-4 mb-3">
+                    <label class="form-label">สาขาเจ้าของบัญชี</label>
+                    <input type="text" id="bbl_accountBranch" class="form-control" placeholder="Branch of Account Owner">
+                  </div>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">ประเภทเช็ค</label>
+                  <div class="row">
+                    <div class="col-6">
+                      <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="bbl_chequeType" id="bbl_typeBBL" value="BBL" checked>
+                        <label class="form-check-label" for="bbl_typeBBL">เช็ค ธ.กรุงเทพ (BBL Cheque)</label>
+                      </div>
+                    </div>
+                    <div class="col-6">
+                      <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="bbl_chequeType" id="bbl_typeOther" value="Other">
+                        <label class="form-check-label" for="bbl_typeOther">เช็คต่างธนาคาร (Non-BBL)</label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <hr>
+                <h6 class="fw-bold">รายการเช็ค (Chq. No. / Drawee Bank / Branch / Chq. Date / Amount)</h6>
+                <div id="bbl_chequeItems">
+                  <div class="row g-2 mb-2 bbl-cheque-row">
+                    <div class="col-2">
+                      <input type="text" class="form-control form-control-sm" placeholder="เลขที่เช็ค" data-field="chqNo">
+                    </div>
+                    <div class="col-3">
+                      <input type="text" class="form-control form-control-sm" placeholder="ชื่อธนาคาร/สาขา" data-field="chqBank">
+                    </div>
+                    <div class="col-3">
+                      <input type="date" class="form-control form-control-sm" data-field="chqDate">
+                    </div>
+                    <div class="col-3">
+                      <input type="number" class="form-control form-control-sm" placeholder="จำนวนเงิน" step="0.01" data-field="chqAmount">
+                    </div>
+                    <div class="col-1">
+                      <button class="btn btn-sm btn-outline-danger" onclick="this.closest('.bbl-cheque-row').remove()"><i class="bi bi-x"></i></button>
+                    </div>
+                  </div>
+                </div>
+                <button class="btn btn-sm btn-outline-secondary mb-3" onclick="addBblChequeRow()">
+                  <i class="bi bi-plus"></i> เพิ่มรายการเช็ค
+                </button>
+                <hr>
+                <div class="row">
+                  <div class="col-6 mb-3">
+                    <label class="form-label">จำนวนเงินรวมตามเช็ค (ตัวอักษร)</label>
+                    <input type="text" id="bbl_amountWords" class="form-control" readonly>
+                  </div>
+                  <div class="col-6 mb-3">
+                    <label class="form-label">จำนวนเงินรวมตามเช็ค (ตัวเลข)</label>
+                    <input type="number" id="bbl_totalAmount" class="form-control" step="0.01" oninput="updateBblAmountWords()">
+                  </div>
+                </div>
+                <hr>
+                <div class="row">
+                  <div class="col-4 mb-2">
+                    <label class="form-label form-label-sm">เลื่อนลง (mm)</label>
+                    <input type="number" id="bbl_offsetTop" class="form-control form-control-sm" value="0" step="0.5">
+                  </div>
+                  <div class="col-4 mb-2">
+                    <label class="form-label form-label-sm">เลื่อนขวา (mm)</label>
+                    <input type="number" id="bbl_offsetLeft" class="form-control form-control-sm" value="0" step="0.5">
+                  </div>
+                  <div class="col-4 mb-2">
+                    <label class="form-label form-label-sm">แนวกระดาษ</label>
+                    <select id="bbl_orientation" class="form-select form-select-sm">
+                      <option value="portrait">แนวตั้ง</option>
+                      <option value="landscape">แนวนอน</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="text-end mt-3">
+                  <button class="btn btn-outline-warning btn-sm" onclick="openBBLFieldAdjust()">
+                    <i class="bi bi-sliders"></i> ปรับทีละช่อง
+                  </button>
+                  <button class="btn btn-outline-info btn-sm" onclick="previewPayinBBL()">
+                    <i class="bi bi-eye"></i> ดูตัวอย่าง
+                  </button>
+                  <button class="btn btn-sm" style="background:#1a237e; color:#fff;" onclick="printPayinBBL()">
+                    <i class="bi bi-printer"></i> พิมพ์ลงฟอร์ม
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-5">
+            <div class="card">
+              <div class="card-header bg-secondary text-white"><h6 class="mb-0"><i class="bi bi-file-text"></i> ตัวอย่าง BBL</h6></div>
+              <div class="card-body"><pre id="bbl_preview" class="payin-preview-box">กรอกข้อมูลแล้วกด "ดูตัวอย่าง"</pre></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Settings Tab -->
+    <div id="tab-settings" style="display:none;">
+      <div class="card">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+          <h6 class="mb-0"><i class="bi bi-gear"></i> ตั้งค่าข้อมูลธนาคาร / ชื่อบัญชี</h6>
+          <button class="btn btn-sm btn-light" onclick="showAddBankModal()">
+            <i class="bi bi-plus-lg"></i> เพิ่มธนาคาร/บัญชี
+          </button>
+        </div>
+        <div class="card-body">
+          <p class="text-muted">แก้ไขชื่อบัญชี, สาขา, เลขที่บัญชี ของแต่ละธนาคาร ข้อมูลจะแสดงในตาราง Stock Cheque และ ประวัติเบิกจ่าย</p>
+          <div id="bankSettingsContainer"></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Add Bank Modal -->
+  <div class="modal fade" id="addBankModal" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title"><i class="bi bi-plus-lg"></i> เพิ่มบัญชีธนาคาร</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label">เลือกธนาคาร</label>
+            <select id="newBankSelect" class="form-select" onchange="onNewBankSelect()">
+              <option value="">-- เลือกธนาคาร --</option>
+              <option value="BBL">ธนาคารกรุงเทพ (BBL)</option>
+              <option value="UOB">ธนาคารยูโอบี (UOB)</option>
+              <option value="KTB">ธนาคารกรุงไทย (KTB)</option>
+              <option value="KBANK">ธนาคารกสิกรไทย (KBANK)</option>
+              <option value="SCB">ธนาคารไทยพาณิชย์ (SCB)</option>
+              <option value="BAY">ธนาคารกรุงศรีอยุธยา (BAY)</option>
+              <option value="TMB">ธนาคารทหารไทยธนชาต (TTB)</option>
+              <option value="CIMB">ธนาคารซีไอเอ็มบี (CIMB)</option>
+              <option value="TISCO">ธนาคารทิสโก้ (TISCO)</option>
+              <option value="KK">ธนาคารเกียรตินาคินภัทร (KK)</option>
+              <option value="LHBANK">ธนาคารแลนด์ แอนด์ เฮ้าส์ (LHBANK)</option>
+              <option value="OTHER">อื่นๆ (กรอกเอง)</option>
+            </select>
+          </div>
+          <div class="mb-3" id="newBankCustomGroup" style="display:none;">
+            <label class="form-label">รหัสธนาคาร (Bank Code)</label>
+            <input type="text" id="newBankCode" class="form-control" placeholder="เช่น KTB, SCB">
+          </div>
+          <div class="mb-3" id="newBankNameGroup" style="display:none;">
+            <label class="form-label">ชื่อธนาคาร</label>
+            <input type="text" id="newBankName" class="form-control" placeholder="เช่น ธนาคารกรุงไทย">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">ชื่อบัญชี (Account Name)</label>
+            <input type="text" id="newBankAccountName" class="form-control" placeholder="ชื่อบัญชีธนาคาร">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">ประเภทบัญชี</label>
+            <select id="newBankAccountType" class="form-select">
+              <option value="ออมทรัพย์">ออมทรัพย์ (Savings)</option>
+              <option value="กระแสรายวัน">กระแสรายวัน (Current)</option>
+              <option value="ฝากประจำ">ฝากประจำ (Fixed)</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">สาขา (Branch)</label>
+            <input type="text" id="newBankBranch" class="form-control">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">เลขที่บัญชี (A/C No.)</label>
+            <input type="text" id="newBankAccountNo" class="form-control">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" data-bs-dismiss="modal">ยกเลิก</button>
+          <button class="btn btn-bbl" onclick="addNewBank()">บันทึก</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Cheque Modal -->
+  <div class="modal fade" id="editChequeModal" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title"><i class="bi bi-pencil"></i> แก้ไขเช็ค</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" id="editChequeId">
+          <div class="mb-3">
+            <label class="form-label">ธนาคาร</label>
+            <select id="editChequeBank" class="form-select"></select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">เลขที่เช็ค</label>
+            <input type="text" id="editChequeNo" class="form-control">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">เล่มที่</label>
+            <input type="text" id="editBookNo" class="form-control">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">ผู้รับเงิน</label>
+            <input type="text" id="editPayeeName" class="form-control">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">หมายเหตุ</label>
+            <textarea id="editNotes" class="form-control" rows="2"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" data-bs-dismiss="modal">ยกเลิก</button>
+          <button class="btn btn-bbl" onclick="saveEditCheque()">บันทึก</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Cheque Modal -->
+  <div class="modal fade" id="addChequeModal" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">เพิ่มเช็ค</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label">ธนาคาร</label>
+            <select id="addBank" class="form-select" required></select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">เลขที่เช็ค</label>
+            <input type="text" id="addChequeNo" class="form-control" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">เล่มที่</label>
+            <input type="text" id="addBookNo" class="form-control">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">ผู้รับเงิน</label>
+            <input type="text" id="addPayeeName" class="form-control" value="บริษัท ซีเรียล แฟคตอริ่ง (ประเทศไทย) จำกัด">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">หมายเหตุ</label>
+            <textarea id="addNotes" class="form-control" rows="2"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" data-bs-dismiss="modal">ยกเลิก</button>
+          <button class="btn btn-bbl" onclick="addCheque()">บันทึก</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bulk Add Modal -->
+  <div class="modal fade" id="bulkAddModal" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">เพิ่มเช็คทั้งเล่ม (50 ใบ)</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label">ธนาคาร</label>
+            <select id="bulkBank" class="form-select" required></select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">เล่มที่</label>
+            <input type="text" id="bulkBookNo" class="form-control">
+          </div>
+          <div class="row">
+            <div class="col-8 mb-3">
+              <label class="form-label">เลขที่เช็คใบแรก</label>
+              <input type="text" id="bulkStart" class="form-control" placeholder="0000001">
+              <small class="text-muted">ใบที่ 2-50 จะรันเลขต่อจากใบแรกอัตโนมัติ</small>
+            </div>
+            <div class="col-4 mb-3">
+              <label class="form-label">จำนวน (ใบ)</label>
+              <input type="number" id="bulkCount" class="form-control" value="50" min="1" max="200">
+            </div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">ผู้รับเงิน</label>
+            <input type="text" id="bulkPayeeName" class="form-control" value="บริษัท ซีเรียล แฟคตอริ่ง (ประเทศไทย) จำกัด">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">หมายเหตุ</label>
+            <textarea id="bulkNotes" class="form-control" rows="2"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" data-bs-dismiss="modal">ยกเลิก</button>
+          <button class="btn btn-bbl" onclick="bulkAddCheques()">บันทึก</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Issue Cheque Modal -->
+  <div class="modal fade" id="issueChequeModal" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">บันทึกการเบิกจ่าย</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" id="issueChequeId">
+          <div class="mb-3">
+            <label class="form-label">เลขที่เช็ค</label>
+            <input type="text" id="issueChequeNo" class="form-control" readonly>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">ประเภทรายการ</label>
+            <select id="issueType" class="form-select">
+              <option value="issued">เบิกจ่าย</option>
+              <option value="voided">ยกเลิก (Void)</option>
+              <option value="cancelled">ยกเลิก (Cancel)</option>
+              <option value="returned">คืนเช็ค</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">ผู้รับเงิน</label>
+            <input type="text" id="issuePayee" class="form-control">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">จำนวนเงิน</label>
+            <input type="number" id="issueAmount" class="form-control" step="0.01">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">วันที่เช็ค</label>
+            <input type="date" id="issueDate" class="form-control">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">รายละเอียด</label>
+            <textarea id="issueDesc" class="form-control" rows="2"></textarea>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">ผู้ทำรายการ</label>
+            <input type="text" id="issueCreatedBy" class="form-control">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" data-bs-dismiss="modal">ยกเลิก</button>
+          <button class="btn btn-bbl" onclick="issueCheque()">บันทึก</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Cheque Detail Modal -->
+  <div class="modal fade" id="chequeDetailModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">รายละเอียดเช็ค</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body" id="chequeDetailBody"></div>
+        <div class="modal-footer">
+          <button class="btn btn-outline-secondary" onclick="printChequeDetail()" title="พิมพ์ Dot Matrix">
+            <i class="bi bi-printer"></i> Print
+          </button>
+          <button class="btn btn-secondary" data-bs-dismiss="modal">ปิด</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Print Cheque Form Modal -->
+  <div class="modal fade" id="printChequeFormModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title"><i class="bi bi-printer"></i> พิมพ์เช็ค / ใบนำฝาก (Dot Matrix)</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div class="row">
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label class="form-label fw-bold">ประเภทฟอร์ม</label>
+                <select id="printFormType" class="form-select" onchange="onPrintFormTypeChange()">
+                  <option value="BBL_CHQ">เช็ค ธ.กรุงเทพ (BBL-CHQ)</option>
+                  <option value="UOB_CHQ">เช็ค ธ.ยูโอบี (UOB-CHQ)</option>
+                  <option value="BBL_SV">ใบนำฝาก ธ.กรุงเทพ (BBL-SV)</option>
+                  <option value="KTB_SV">ใบนำฝาก ธ.กรุงไทย (KTB-SV)</option>
+                </select>
+              </div>
+              <div class="mb-3">
+                <label class="form-label">วันที่</label>
+                <input type="date" id="printChqDate" class="form-control">
+              </div>
+              <div class="mb-3">
+                <label class="form-label">ชื่อผู้รับเงิน / ชื่อบัญชี</label>
+                <input type="text" id="printChqPayee" class="form-control">
+              </div>
+              <div class="mb-3">
+                <label class="form-label">จำนวนเงิน (ตัวอักษร)</label>
+                <input type="text" id="printChqAmountText" class="form-control" readonly>
+              </div>
+              <div class="mb-3">
+                <label class="form-label">จำนวนเงิน (ตัวเลข)</label>
+                <input type="number" id="printChqAmount" class="form-control" step="0.01" oninput="updateChqAmountText()">
+              </div>
+            </div>
+            <div class="col-md-6">
+              <!-- ช่องเพิ่มเติม สำหรับใบนำฝาก -->
+              <div id="printSvFields">
+                <div class="mb-3">
+                  <label class="form-label">สาขา</label>
+                  <input type="text" id="printChqBranch" class="form-control">
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">เลขที่บัญชี</label>
+                  <input type="text" id="printChqAccountNo" class="form-control">
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">เลขที่เช็ค</label>
+                  <input type="text" id="printChqNo" class="form-control">
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">ธนาคาร/สาขาเช็ค</label>
+                  <input type="text" id="printChqFromBank" class="form-control" placeholder="เช่น BBL/ปตท.ถนนรามอินทรา">
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">ผู้นำฝาก / เบอร์โทร</label>
+                  <input type="text" id="printChqDepositor" class="form-control" placeholder="เช่น ฉันท์สินี/02-576-1181 ต่อ 403">
+                </div>
+              </div>
+              <hr>
+              <div class="row">
+                <div class="col-4 mb-2">
+                  <label class="form-label form-label-sm">เลื่อนลง (mm)</label>
+                  <input type="number" id="printChqOffsetTop" class="form-control form-control-sm" value="0" step="0.5">
+                </div>
+                <div class="col-4 mb-2">
+                  <label class="form-label form-label-sm">เลื่อนขวา (mm)</label>
+                  <input type="number" id="printChqOffsetLeft" class="form-control form-control-sm" value="0" step="0.5">
+                </div>
+                <div class="col-4 mb-2">
+                  <label class="form-label form-label-sm">แนวกระดาษ</label>
+                  <select id="printChqOrientation" class="form-select form-select-sm">
+                    <option value="portrait">แนวตั้ง (Portrait)</option>
+                    <option value="landscape">แนวนอน (Landscape)</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-outline-warning" onclick="openCHQFieldAdjust()">
+            <i class="bi bi-sliders"></i> ปรับทีละช่อง
+          </button>
+          <button class="btn btn-outline-info" onclick="previewChequePrint()">
+            <i class="bi bi-grid-3x3"></i> ดูตำแหน่ง
+          </button>
+          <button class="btn btn-dark" onclick="executePrintChequeForm()">
+            <i class="bi bi-printer"></i> พิมพ์ลงฟอร์ม
+          </button>
+          <button class="btn btn-secondary" data-bs-dismiss="modal">ปิด</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="brand-footer">
+    Serial Factoring (Thailand) Co., Ltd. &copy; 2024 — Stock Cheque Management System
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
