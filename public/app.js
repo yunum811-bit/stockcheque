@@ -603,6 +603,17 @@ function openPayinPrintWindow(positions, title, config) {
   let pageW = config.pageWidth || '210mm';
   let pageH = config.pageHeight || '148mm';
 
+  // สำหรับ dot matrix: ใช้การสลับ width/height แทน orientation keyword
+  // เพราะ driver dot matrix ไม่รองรับ landscape keyword
+  let printW, printH;
+  if (orientation === 'landscape') {
+    printW = pageH;  // สลับ
+    printH = pageW;
+  } else {
+    printW = pageW;
+    printH = pageH;
+  }
+
   printWin.document.write(`
     <!DOCTYPE html>
     <html>
@@ -610,7 +621,7 @@ function openPayinPrintWindow(positions, title, config) {
       <title>${title}</title>
       <style>
         @page {
-          size: ${pageW} ${pageH};
+          size: ${printW} ${printH};
           margin: 0;
         }
         * { margin: 0; padding: 0; }
@@ -619,8 +630,8 @@ function openPayinPrintWindow(positions, title, config) {
           margin: 0;
           padding: 0;
           position: relative;
-          width: ${orientation === 'landscape' ? pageH : pageW};
-          height: ${orientation === 'landscape' ? pageW : pageH};
+          width: ${printW};
+          height: ${printH};
           -webkit-print-color-adjust: exact;
         }
         @media print {
