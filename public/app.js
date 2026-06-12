@@ -2437,3 +2437,80 @@ function openCHQFieldAdjust() {
   const fields = getCHQFields(formType);
   openFieldAdjustment(formType, fields, {});
 }
+
+// ============ PRINTER SETUP GUIDE ============
+
+function openPrinterSetupGuide() {
+  const guideWin = window.open('', '_blank', 'width=750,height=800');
+  guideWin.document.write(`
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>วิธีตั้งค่า Epson LQ-310</title>
+      <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+      <style>
+        body { font-family: 'Prompt', sans-serif; padding: 30px; font-size: 14px; }
+        .step { background: #f8f9fa; border-left: 4px solid #1b5e20; padding: 12px 15px; margin-bottom: 10px; border-radius: 4px; }
+        .step-num { font-weight: 700; color: #1b5e20; }
+        table { font-size: 13px; }
+        .warn { background: #fff3cd; border: 1px solid #ffc107; padding: 10px; border-radius: 6px; }
+      </style>
+    </head>
+    <body>
+      <h4>🖨️ วิธีตั้งค่า Custom Paper Size - Epson LQ-310</h4>
+      <hr>
+
+      <h5>ขั้นตอนที่ 1: สร้าง Custom Form</h5>
+      <div class="step"><span class="step-num">1.</span> กด <kbd>Windows + R</kbd> → พิมพ์ <code>control printers</code> → Enter</div>
+      <div class="step"><span class="step-num">2.</span> คลิก <strong>Epson LQ-310</strong> ให้ highlight</div>
+      <div class="step"><span class="step-num">3.</span> ไปที่เมนู <strong>File → Print server properties</strong> (กด Alt ถ้าไม่เห็นเมนู)</div>
+      <div class="step"><span class="step-num">4.</span> แท็บ <strong>Forms</strong> → ติ๊ก ☑ <strong>Create a new form</strong></div>
+      <div class="step"><span class="step-num">5.</span> กรอกค่าตามตารางด้านล่าง → กด <strong>Save Form</strong></div>
+
+      <h5 class="mt-4">ค่าที่ต้องสร้าง:</h5>
+      <table class="table table-bordered table-sm">
+        <thead class="table-dark">
+          <tr><th>ชื่อ Form</th><th>Width (cm)</th><th>Height (cm)</th><th>ใช้กับ</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>Cheque_BBL</strong></td><td>7.60</td><td>21.00</td><td>เช็ค BBL / UOB / BAY</td></tr>
+          <tr><td><strong>PayIn_KTB</strong></td><td>10.00</td><td>21.00</td><td>ใบนำฝาก กรุงไทย</td></tr>
+          <tr><td><strong>PayIn_UOB</strong></td><td>14.00</td><td>21.00</td><td>ใบนำฝาก UOB</td></tr>
+          <tr><td><strong>PayIn_BBL</strong></td><td>14.80</td><td>21.00</td><td>ใบนำฝาก กรุงเทพ</td></tr>
+        </tbody>
+      </table>
+      <p class="text-muted">* Margins ตั้ง 0 ทั้งหมด</p>
+
+      <h5 class="mt-4">ขั้นตอนที่ 2: เลือก Form ตอนพิมพ์</h5>
+      <div class="step"><span class="step-num">1.</span> เมื่อ Print Dialog เปิด → กด <strong>Preferences</strong></div>
+      <div class="step"><span class="step-num">2.</span> Paper Size → เลือก Form ที่สร้าง (เช่น <code>Cheque_BBL</code>)</div>
+      <div class="step"><span class="step-num">3.</span> Orientation → เลือก <strong>Landscape</strong></div>
+      <div class="step"><span class="step-num">4.</span> กด OK → Print</div>
+
+      <h5 class="mt-4">ค่าในโปรแกรมที่ต้องตรงกัน:</h5>
+      <table class="table table-bordered table-sm">
+        <thead class="table-success">
+          <tr><th>ฟอร์ม</th><th>กว้าง (mm)</th><th>สูง (mm)</th><th>แนวกระดาษ</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>เช็ค</td><td>210</td><td>76</td><td>แนวนอน</td></tr>
+          <tr><td>Pay-in KTB</td><td>210</td><td>100</td><td>แนวนอน</td></tr>
+          <tr><td>Pay-in UOB</td><td>210</td><td>140</td><td>แนวนอน</td></tr>
+          <tr><td>Pay-in BBL</td><td>210</td><td>148</td><td>แนวนอน</td></tr>
+        </tbody>
+      </table>
+
+      <div class="warn mt-4">
+        <strong>⚠️ ถ้าพิมพ์ไม่ตรง:</strong><br>
+        • ลองสลับค่า Width ↔ Height ใน Print Server Properties<br>
+        • หรือเปลี่ยนจาก Landscape เป็น Portrait<br>
+        • Dot matrix อ่าน Width = ด้านที่กระดาษป้อนเข้า (ด้านสั้น)
+      </div>
+
+      <button class="btn btn-dark mt-4" onclick="window.print()">🖨️ พิมพ์คู่มือนี้</button>
+      <button class="btn btn-secondary mt-4 ms-2" onclick="window.close()">ปิด</button>
+    </body>
+    </html>
+  `);
+  guideWin.document.close();
+}
