@@ -603,16 +603,13 @@ function openPayinPrintWindow(positions, title, config) {
   let pageW = config.pageWidth || '210mm';
   let pageH = config.pageHeight || '148mm';
 
-  // สำหรับ dot matrix: ใช้การสลับ width/height แทน orientation keyword
-  // เพราะ driver dot matrix ไม่รองรับ landscape keyword
-  let printW, printH;
-  if (orientation === 'landscape') {
-    printW = pageH;  // สลับ
-    printH = pageW;
-  } else {
-    printW = pageW;
-    printH = pageH;
-  }
+  // สำหรับ dot matrix Epson LQ-310:
+  // กระดาษป้อนด้าน 210mm เข้าเครื่อง
+  // ตำแหน่ง left = แนวกว้างของฟอร์ม (210mm)
+  // ตำแหน่ง top = แนวสูงของฟอร์ม (76-148mm)
+  // ใช้ @page size ตรงตามขนาดจริงเสมอ (ไม่สลับ)
+  let printW = pageW;
+  let printH = pageH;
 
   printWin.document.write(`
     <!DOCTYPE html>
