@@ -126,6 +126,16 @@ async function initDatabase() {
     db.run("INSERT INTO banks (bank_code, bank_name, branch_name, account_number, account_name) VALUES ('UOB', 'ธนาคารยูโอบี', 'สำนักงานใหญ่', '', '')");
   }
 
+  // Create field_offsets table (เก็บค่าปรับตำแหน่ง share ทุกเครื่อง)
+  db.run(`
+    CREATE TABLE IF NOT EXISTS field_offsets (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      form_key TEXT NOT NULL UNIQUE,
+      offsets_json TEXT NOT NULL,
+      updated_at TEXT DEFAULT (datetime('now','localtime'))
+    )
+  `);
+
   saveDatabase();
   return db;
 }

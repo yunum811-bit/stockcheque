@@ -517,6 +517,29 @@ app.get('/api/stats/monthly', (req, res) => {
   res.json(monthly);
 });
 
+// ============ FIELD OFFSETS (ค่าปรับตำแหน่ง share ทุกเครื่อง) ============
+
+app.get('/api/field-offsets/:formKey', (req, res) => {
+  const row = queryOne('SELECT offsets_json FROM field_offsets WHERE form_key = ?', [req.params.formKey]);
+  if (row) {
+    res.json(JSON.parse(row.offsets_json));
+  } else {
+    res.json({});
+  }
+});
+
+app.put('/api/field-offsets/:formKey', (req, res) => {
+  const formKey = req.params.formKey;
+  const offsets = JSON.stringify(req.body);
+  const existing = queryOne('SELECT id FROM field_offsets WHERE form_key = ?', [formKey]);
+  if (existing) {
+    execute("UPDATE field_offsets SET offsets_json = ?, updated_at = datetime('now','localtime') WHERE form_key = ?", [offsets, formKey]);
+  } else {
+    execute("INSERT INTO field_offsets (form_key, offsets_json) VALUES (?, ?)", [formKey, offsets]);
+  }
+  res.json({ message: 'บันทึกตำแหน่งสำเร็จ' });
+});
+
 // ============ START SERVER ============
 
 async function startServer() {

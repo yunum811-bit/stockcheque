@@ -7,6 +7,7 @@ let banks = [];
 document.addEventListener('DOMContentLoaded', () => {
   loadBanks();
   loadStats();
+  loadAllFieldOffsets();
   // Set default dates for pay-in forms
   const today = new Date().toISOString().split('T')[0];
   const dateFields = ['ktb_date', 'uob_date', 'bbl_date'];
@@ -2227,16 +2228,51 @@ async function saveEditCheque() {
 // ระบบปรับตำแหน่งแต่ละ field อิสระ เก็บใน localStorage
 
 function getFieldOffsets(formKey) {
-  try {
-    const saved = localStorage.getItem(`fieldOffsets_${formKey}`);
-    return saved ? JSON.parse(saved) : {};
-  } catch (e) {
-    return {};
-  }
+  // ดึงจาก cache ใน memory (โหลดจาก server ตอนเริ่มต้น)
+  return window._fieldOffsetsCache && window._fieldOffsetsCache[formKey] || {};
 }
 
 function saveFieldOffsets(formKey, offsets) {
-  localStorage.setItem(`fieldOffsets_${formKey}`, JSON.stringify(offsets));
+  // บันทึกลง server (share ทุกเครื่อง)
+  if (!window._fieldOffsetsCache) window._fieldOffsetsCache = {};
+  window._fieldOffsetsCache[formKey] = offsets;
+
+  fetch(`${API}/api/field-offsets/${formKey}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(offsets)
+  });
+
+  // เก็บ localStorage เป็น backup ด้วย
+  try { localStorage.setItem(`fieldOffsets_${formKey}`, JSON.stringify(offsets)); } catch(e) {}
+}
+
+// โหลดค่า offset ทั้งหมดจาก server ตอนเริ่มต้น
+async function loadAllFieldOffsets() {
+  const formKeys = ['KTB', 'UOB', 'BBL', 'BBL_CHQ', 'UOB_CHQ', 'BBL_SV', 'KTB_SV'];
+  if (!window._fieldOffsetsCache) window._fieldOffsetsCache = {};
+
+  for (const key of formKeys) {
+    try {
+      const res = await fetch(`${API}/api/field-offsets/${key}`);
+      const data = await res.json();
+      if (data && Object.keys(data).length > 0) {
+        window._fieldOffsetsCache[key] = data;
+      } else {
+        // fallback: ใช้ค่าจาก localStorage ถ้า server ยังไม่มี
+        try {
+          const local = localStorage.getItem(`fieldOffsets_${key}`);
+          if (local) window._fieldOffsetsCache[key] = JSON.parse(local);
+        } catch(e) {}
+      }
+    } catch(e) {
+      // fallback localStorage
+      try {
+        const local = localStorage.getItem(`fieldOffsets_${key}`);
+        if (local) window._fieldOffsetsCache[key] = JSON.parse(local);
+      } catch(e2) {}
+    }
+  }
 }
 
 // เปิดหน้าปรับตำแหน่งแต่ละ field แบบ interactive
