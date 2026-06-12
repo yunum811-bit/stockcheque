@@ -2348,30 +2348,30 @@ function getUOBFields() {
     { name: 'chequeRow', label: 'รายการเช็ค - ธนาคาร/สาขา', defaultTop: 70, defaultLeft: 15 },
     { name: 'chequeNo', label: 'รายการเช็ค - เลขที่เช็ค', defaultTop: 70, defaultLeft: 100 },
     { name: 'chequeAmt', label: 'รายการเช็ค - จำนวนเงิน', defaultTop: 70, defaultLeft: 145 },
-    { name: 'totalAmount', label: 'รวมเงินฝาก', defaultTop: 90, defaultLeft: 130 },
     { name: 'amountWords', label: 'จำนวนเงินตัวอักษร', defaultTop: 90, defaultLeft: 15 },
+    { name: 'totalAmount', label: 'รวมเงินฝาก', defaultTop: 90, defaultLeft: 130 },
     { name: 'depositor', label: 'ผู้ทำรายการ', defaultTop: 90, defaultLeft: 165 },
   ];
 }
 
 function getBBLFields() {
   return [
-    { name: 'branch', label: 'สาขา', defaultTop: 18, defaultLeft: 18 },
-    { name: 'date', label: 'วันที่', defaultTop: 24, defaultLeft: 18 },
-    { name: 'accountType', label: 'ประเภทบัญชี', defaultTop: 14, defaultLeft: 85 },
-    { name: 'depositor', label: 'ผู้นำฝาก', defaultTop: 30, defaultLeft: 25 },
-    { name: 'phone', label: 'โทรศัพท์', defaultTop: 30, defaultLeft: 95 },
-    { name: 'accountNo', label: 'เลขที่บัญชี (ตำแหน่ง)', defaultTop: 30, defaultLeft: 155 },
+    { name: 'branch', label: 'สาขา', defaultTop: 20, defaultLeft: 15 },
+    { name: 'date', label: 'วันที่', defaultTop: 26, defaultLeft: 15 },
+    { name: 'accountType', label: 'ประเภทบัญชี', defaultTop: 16, defaultLeft: 80 },
+    { name: 'depositor', label: 'ผู้นำฝาก', defaultTop: 33, defaultLeft: 15 },
+    { name: 'phone', label: 'โทรศัพท์', defaultTop: 33, defaultLeft: 85 },
+    { name: 'accountNo', label: 'เลขที่บัญชี (ตำแหน่ง)', defaultTop: 33, defaultLeft: 160 },
     { name: 'accountNo_gap1', label: 'เลขที่บัญชี - ระยะขีดที่ 1 (ระหว่างส่วน 1-2)', defaultTop: 0, defaultLeft: 0 },
     { name: 'accountNo_gap2', label: 'เลขที่บัญชี - ระยะขีดที่ 2 (ระหว่างส่วน 2-3)', defaultTop: 0, defaultLeft: 0 },
-    { name: 'accountName', label: 'ชื่อบัญชี', defaultTop: 36, defaultLeft: 25 },
-    { name: 'accountBranch', label: 'สาขาเจ้าของบัญชี', defaultTop: 36, defaultLeft: 130 },
-    { name: 'chequeRow', label: 'รายการเช็ค - เลขที่เช็ค', defaultTop: 56, defaultLeft: 15 },
-    { name: 'chequeBank', label: 'รายการเช็ค - ธนาคาร/สาขา', defaultTop: 56, defaultLeft: 50 },
-    { name: 'chequeDate', label: 'รายการเช็ค - วันที่เช็ค', defaultTop: 56, defaultLeft: 108 },
-    { name: 'chequeAmt', label: 'รายการเช็ค - จำนวนเงิน', defaultTop: 56, defaultLeft: 148 },
-    { name: 'amountWords', label: 'จำนวนเงินตัวอักษร', defaultTop: 91, defaultLeft: 15 },
-    { name: 'totalAmount', label: 'จำนวนเงินรวม', defaultTop: 91, defaultLeft: 140 },
+    { name: 'accountName', label: 'ชื่อบัญชี', defaultTop: 40, defaultLeft: 15 },
+    { name: 'accountBranch', label: 'สาขาเจ้าของบัญชี', defaultTop: 40, defaultLeft: 120 },
+    { name: 'chequeRow', label: 'รายการเช็ค - เลขที่เช็ค', defaultTop: 62, defaultLeft: 15 },
+    { name: 'chequeBank', label: 'รายการเช็ค - ธนาคาร/สาขา', defaultTop: 62, defaultLeft: 50 },
+    { name: 'chequeDate', label: 'รายการเช็ค - วันที่เช็ค', defaultTop: 62, defaultLeft: 115 },
+    { name: 'chequeAmt', label: 'รายการเช็ค - จำนวนเงิน', defaultTop: 62, defaultLeft: 155 },
+    { name: 'amountWords', label: 'จำนวนเงินตัวอักษร', defaultTop: 99, defaultLeft: 15 },
+    { name: 'totalAmount', label: 'จำนวนเงินรวม', defaultTop: 99, defaultLeft: 140 },
   ];
 }
 
