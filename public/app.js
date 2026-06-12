@@ -966,12 +966,16 @@ function executePrintChequeForm() {
   const offsetTop = parseFloat(document.getElementById('printChqOffsetTop').value) || 0;
   const offsetLeft = parseFloat(document.getElementById('printChqOffsetLeft').value) || 0;
   const orientation = document.getElementById('printChqOrientation').value;
+  const pageWidth = document.getElementById('printChqPageWidth').value + 'mm';
+  const pageHeight = document.getElementById('printChqPageHeight').value + 'mm';
 
   const printConfig = {
     ...config,
     offsetTop: config.offsetTop + offsetTop,
     offsetLeft: config.offsetLeft + offsetLeft,
-    orientation: orientation
+    orientation: orientation,
+    pageWidth: pageWidth,
+    pageHeight: pageHeight
   };
 
   const positions = generateChequeFormPositions(formType);
@@ -1676,7 +1680,7 @@ function printPayinKTB() {
   const fo = getFieldOffsets('KTB');
 
   const positions = [];
-  const config = { pageWidth: '210mm', pageHeight: '100mm', fontSize: '11pt', orientation: document.getElementById('ktb_orientation').value };
+  const config = { pageWidth: document.getElementById('ktb_pageWidth').value + 'mm', pageHeight: document.getElementById('ktb_pageHeight').value + 'mm', fontSize: '11pt', orientation: document.getElementById('ktb_orientation').value };
 
   let dateStr = '';
   if (date) {
@@ -1784,7 +1788,7 @@ function printPayinUOB() {
   const fo = getFieldOffsets('UOB');
 
   const positions = [];
-  const config = { pageWidth: '210mm', pageHeight: '140mm', fontSize: '11pt', orientation: document.getElementById('uob_orientation').value };
+  const config = { pageWidth: document.getElementById('uob_pageWidth').value + 'mm', pageHeight: document.getElementById('uob_pageHeight').value + 'mm', fontSize: '11pt', orientation: document.getElementById('uob_orientation').value };
 
   let dateStr = '';
   if (date) {
@@ -1926,7 +1930,7 @@ function printPayinBBL() {
   const fo = getFieldOffsets('BBL');
 
   const positions = [];
-  const config = { pageWidth: '210mm', pageHeight: '148mm', fontSize: '10pt', orientation: document.getElementById('bbl_orientation').value };
+  const config = { pageWidth: document.getElementById('bbl_pageWidth').value + 'mm', pageHeight: document.getElementById('bbl_pageHeight').value + 'mm', fontSize: '10pt', orientation: document.getElementById('bbl_orientation').value };
 
   let dateStr = '';
   if (date) {
@@ -1934,61 +1938,66 @@ function printPayinBBL() {
     dateStr = `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear() + 543}`;
   }
 
-  if (branch) positions.push({ top: 18 + offsetTop + (fo.branch_top||0), left: 18 + offsetLeft + (fo.branch_left||0), text: branch });
-  if (dateStr) positions.push({ top: 24 + offsetTop + (fo.date_top||0), left: 18 + offsetLeft + (fo.date_left||0), text: dateStr });
+  // === Layout ตามฟอร์มจริง BBL "ชุดฝากเช็ค Deposit Slip for Cheque" ===
+  // Line 1: สาขา (ซ้าย)
+  if (branch) positions.push({ top: 20 + offsetTop + (fo.branch_top||0), left: 15 + offsetLeft + (fo.branch_left||0), text: branch });
 
-  const atTop = 14 + offsetTop + (fo.accountType_top||0);
+  // Line 1: ประเภทบัญชี checkboxes (กลาง-ขวา ตาม layout: ออมทรัพย์|กระแสรายวัน|ประจำ|สินมัธยะ)
+  const atTop = 16 + offsetTop + (fo.accountType_top||0);
   const atLeft = fo.accountType_left||0;
-  if (accountType === 'ออมทรัพย์') positions.push({ top: atTop, left: 85 + offsetLeft + atLeft, text: '●' });
-  else if (accountType === 'กระแสรายวัน') positions.push({ top: atTop, left: 65 + offsetLeft + atLeft, text: '●' });
-  else if (accountType === 'สินมัธยะ') positions.push({ top: atTop, left: 105 + offsetLeft + atLeft, text: '●' });
-  else if (accountType === 'ฝากประจำ') positions.push({ top: atTop, left: 115 + offsetLeft + atLeft, text: '●' });
+  if (accountType === 'ออมทรัพย์') positions.push({ top: atTop, left: 80 + offsetLeft + atLeft, text: '●' });
+  else if (accountType === 'กระแสรายวัน') positions.push({ top: atTop, left: 105 + offsetLeft + atLeft, text: '●' });
+  else if (accountType === 'สินมัธยะ') positions.push({ top: atTop, left: 120 + offsetLeft + atLeft, text: '●' });
+  else if (accountType === 'ฝากประจำ') positions.push({ top: atTop, left: 95 + offsetLeft + atLeft, text: '●' });
 
-  if (depositor) positions.push({ top: 30 + offsetTop + (fo.depositor_top||0), left: 25 + offsetLeft + (fo.depositor_left||0), text: depositor });
-  if (phone) positions.push({ top: 30 + offsetTop + (fo.phone_top||0), left: 95 + offsetLeft + (fo.phone_left||0), text: phone });
+  // Line 2: วันที่ (ซ้าย)
+  if (dateStr) positions.push({ top: 26 + offsetTop + (fo.date_top||0), left: 15 + offsetLeft + (fo.date_left||0), text: dateStr });
+
+  // Line 3: ผู้นำฝาก (ซ้าย) | โทรศัพท์ (กลาง) | เลขที่บัญชี (ขวาสุด)
+  if (depositor) positions.push({ top: 33 + offsetTop + (fo.depositor_top||0), left: 15 + offsetLeft + (fo.depositor_left||0), text: depositor });
+  if (phone) positions.push({ top: 33 + offsetTop + (fo.phone_top||0), left: 85 + offsetLeft + (fo.phone_left||0), text: phone });
+
+  // เลขที่บัญชี (A/C No.) - ขวาสุด
   if (accountNo) {
-    // แยกเลขที่บัญชีเป็น 3 ส่วน เช่น "024-7-090988" → ["024", "7", "090988"]
     const accParts = accountNo.split('-');
     if (accParts.length >= 3) {
-      const baseTop = 30 + offsetTop + (fo.accountNo_top||0);
-      const baseLeft = 155 + offsetLeft + (fo.accountNo_left||0);
-      const gap1 = fo.accountNo_gap1_left || 0; // ระยะเพิ่มระหว่างส่วนที่ 1-2
-      const gap2 = fo.accountNo_gap2_left || 0; // ระยะเพิ่มระหว่างส่วนที่ 2-3
+      const baseTop = 33 + offsetTop + (fo.accountNo_top||0);
+      const baseLeft = 160 + offsetLeft + (fo.accountNo_left||0);
+      const gap1 = fo.accountNo_gap1_left || 0;
+      const gap2 = fo.accountNo_gap2_left || 0;
       const spacing = fo.accountNo_spacing || 0;
-      // ส่วนที่ 1 (3 ตัว)
       positions.push({ top: baseTop, left: baseLeft, text: accParts[0], letterSpacing: spacing || undefined });
-      // ส่วนที่ 2 (1 ตัว) - หลังขีดแรก
       const part1Width = (accParts[0].length * (spacing || 2.5)) + 4 + gap1;
       positions.push({ top: baseTop, left: baseLeft + part1Width, text: accParts[1], letterSpacing: spacing || undefined });
-      // ส่วนที่ 3 (6 ตัว) - หลังขีดที่สอง
       const part2Width = part1Width + (accParts[1].length * (spacing || 2.5)) + 4 + gap2;
       positions.push({ top: baseTop, left: baseLeft + part2Width, text: accParts.slice(2).join(''), letterSpacing: spacing || undefined });
     } else {
-      // ถ้าไม่มีขีด ใช้แบบปกติ
-      positions.push({ top: 30 + offsetTop + (fo.accountNo_top||0), left: 155 + offsetLeft + (fo.accountNo_left||0), text: accountNo, letterSpacing: fo.accountNo_spacing || undefined });
+      positions.push({ top: 33 + offsetTop + (fo.accountNo_top||0), left: 160 + offsetLeft + (fo.accountNo_left||0), text: accountNo, letterSpacing: fo.accountNo_spacing || undefined });
     }
   }
 
-  if (accountName) positions.push({ top: 36 + offsetTop + (fo.accountName_top||0), left: 25 + offsetLeft + (fo.accountName_left||0), text: accountName });
-  if (accountBranch) positions.push({ top: 36 + offsetTop + (fo.accountBranch_top||0), left: 130 + offsetLeft + (fo.accountBranch_left||0), text: accountBranch });
+  // Line 4: ชื่อบัญชี (ซ้าย) | สาขาเจ้าของบัญชี (ขวา)
+  if (accountName) positions.push({ top: 40 + offsetTop + (fo.accountName_top||0), left: 15 + offsetLeft + (fo.accountName_left||0), text: accountName });
+  if (accountBranch) positions.push({ top: 40 + offsetTop + (fo.accountBranch_top||0), left: 120 + offsetLeft + (fo.accountBranch_left||0), text: accountBranch });
 
-  const chequeStartTop = 56 + (fo.chequeRow_top||0);
+  // ตารางรายการเช็ค เริ่มประมาณ top:62mm
+  const chequeStartTop = 62 + (fo.chequeRow_top||0);
   const chequeRowH = 5.5;
-  const chequeLeftOff = fo.chequeRow_left||0;
   cheques.forEach((c, i) => {
     if (i >= 5) return;
     const rowTop = chequeStartTop + (i * chequeRowH) + offsetTop;
-    if (c.no) positions.push({ top: rowTop, left: 15 + offsetLeft + chequeLeftOff, text: c.no, letterSpacing: fo.chequeRow_spacing||0 || undefined });
+    if (c.no) positions.push({ top: rowTop, left: 15 + offsetLeft + (fo.chequeRow_left||0), text: c.no });
     if (c.bank) positions.push({ top: rowTop + (fo.chequeBank_top||0), left: 50 + offsetLeft + (fo.chequeBank_left||0), text: c.bank });
     if (c.date) {
       const cd = new Date(c.date);
       const cds = `${String(cd.getDate()).padStart(2,'0')}/${String(cd.getMonth()+1).padStart(2,'0')}/${cd.getFullYear()+543}`;
-      positions.push({ top: rowTop + (fo.chequeDate_top||0), left: 108 + offsetLeft + (fo.chequeDate_left||0), text: cds });
+      positions.push({ top: rowTop + (fo.chequeDate_top||0), left: 115 + offsetLeft + (fo.chequeDate_left||0), text: cds });
     }
-    if (c.amount > 0) positions.push({ top: rowTop + (fo.chequeAmt_top||0), left: 148 + offsetLeft + (fo.chequeAmt_left||0), text: fmtMoney(c.amount) });
+    if (c.amount > 0) positions.push({ top: rowTop + (fo.chequeAmt_top||0), left: 155 + offsetLeft + (fo.chequeAmt_left||0), text: fmtMoney(c.amount) });
   });
 
-  const totalRow = chequeStartTop + (5 * chequeRowH) + 8 + offsetTop;
+  // แถบเหลืองล่าง: จำนวนเงินรวม
+  const totalRow = chequeStartTop + (5 * chequeRowH) + 10 + offsetTop;
   if (amountWords) positions.push({ top: totalRow + (fo.amountWords_top||0), left: 15 + offsetLeft + (fo.amountWords_left||0), text: amountWords });
   if (totalAmount > 0) positions.push({ top: totalRow + (fo.totalAmount_top||0), left: 140 + offsetLeft + (fo.totalAmount_left||0), text: fmtMoney(totalAmount) });
 
