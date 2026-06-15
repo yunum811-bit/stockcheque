@@ -559,8 +559,8 @@ function openPrintWindow(textContent, title, orientation) {
         }
         * { margin: 0; padding: 0; }
         body {
-          font-family: 'Courier New', monospace;
-          font-size: 10pt;
+          font-family: 'Angsana New', 'AngsanaUPC', serif;
+          font-size: 16pt;
           line-height: 1.4;
           white-space: pre;
           margin: 0;
@@ -596,7 +596,9 @@ function openPayinPrintWindow(positions, title, config) {
     if (p.letterSpacing) {
       extraStyle = `letter-spacing:${p.letterSpacing}mm;`;
     }
-    const style = `position:absolute; top:${p.top}mm; left:${p.left}mm; font-size:${p.fontSize || config.fontSize || '12pt'}; white-space:pre; ${extraStyle}`;
+    const fontFamily = config.fontFamily || "'Angsana New','AngsanaUPC',serif";
+    const fontSize = config.fontSize || '16pt';
+    const style = `position:absolute; top:${p.top}mm; left:${p.left}mm; font-family:${fontFamily}; font-size:${p.fontSize || fontSize}; white-space:pre; ${extraStyle}`;
     elementsHtml += `<div style="${style}">${p.text}</div>\n`;
   });
 
@@ -604,14 +606,8 @@ function openPayinPrintWindow(positions, title, config) {
   let pageW = config.pageWidth || '210mm';
   let pageH = config.pageHeight || '148mm';
 
-  // สำหรับ dot matrix Epson LQ-310:
-  // กระดาษป้อนด้าน 210mm เข้าเครื่อง
-  // ตำแหน่ง left = แนวกว้างของฟอร์ม (210mm)
-  // ตำแหน่ง top = แนวสูงของฟอร์ม (76-148mm)
-  // ใช้ @page size ตรงตามขนาดจริงเสมอ (ไม่สลับ)
-  let printW = pageW;
-  let printH = pageH;
-
+  // Epson LQ-310: body ใช้ขนาดจริง, ไม่กำหนด @page size (ให้ driver ควบคุม)
+  // width = ด้านกว้างของฟอร์ม, height = ด้านสูงของฟอร์ม
   printWin.document.write(`
     <!DOCTYPE html>
     <html>
@@ -619,17 +615,17 @@ function openPayinPrintWindow(positions, title, config) {
       <title>${title}</title>
       <style>
         @page {
-          size: ${printW} ${printH};
           margin: 0;
         }
         * { margin: 0; padding: 0; }
         html, body {
-          font-family: 'Courier New', monospace;
+          font-family: 'Angsana New', 'AngsanaUPC', serif;
           margin: 0;
           padding: 0;
           position: relative;
-          width: ${printW};
-          height: ${printH};
+          width: 300mm;
+          height: 300mm;
+          overflow: visible;
           -webkit-print-color-adjust: exact;
         }
         @media print {
@@ -746,16 +742,16 @@ const CHQ_FORM_CONFIGS = {
   // Excel BBL-BAY-CHQ: row1=date(col4), row2=payee(col2), row3=amountText(col3), row4=amountNum(col4)
   BBL_CHQ: {
     name: 'เช็ค ธ.กรุงเทพ (BBL-BAY-CHQ)',
-    pageWidth: '210mm',
-    pageHeight: '76mm',
-    fontSize: '12pt',
+    pageWidth: '173mm',
+    pageHeight: '87mm',
+    fontSize: '16pt',
     offsetTop: 0,
     offsetLeft: 0,
     fields: {
-      date:       { top: 4.2, left: 148 },     // row1, col4: วันที่ (09/06/2026)
-      payee:      { top: 8.5, left: 20 },      // row2, col2: ชื่อผู้รับเงิน
-      amountText: { top: 12.7, left: 55 },     // row3, col3: ***สองแสน...***
-      amountNum:  { top: 16.9, left: 148 },    // row4, col4: 250,514.29
+      date:       { top: 4.2, left: 118 },     // วันที่ มุมขวาบน (เริ่ม 118mm, 8ช่อง x 6.25 = 50mm → จบ 168mm)
+      payee:      { top: 14, left: 20 },       // ชื่อผู้รับเงิน
+      amountText: { top: 22, left: 20 },       // จำนวนเงินตัวอักษร
+      amountNum:  { top: 14, left: 120 },      // จำนวนเงินตัวเลข (ขวา)
     }
   },
 
@@ -764,16 +760,20 @@ const CHQ_FORM_CONFIGS = {
   // UOB เว้นบรรทัดทุก field (double-spaced)
   UOB_CHQ: {
     name: 'เช็ค ธ.ยูโอบี (UOB-CHQ)',
-    pageWidth: '210mm',
-    pageHeight: '76mm',
-    fontSize: '12pt',
+    pageWidth: '173mm',
+    pageHeight: '83mm',
+    fontSize: '16pt',
     offsetTop: 0,
     offsetLeft: 0,
+    // จากรูปเช็ค UOB จริง:
+    // วันที่: มุมขวาบน ในกรอบ (DD MM YYYY แยกช่อง)
+    // Pay to: 2 บรรทัด (ชื่อผู้รับเงิน)
+    // The sum of: จำนวนเงินตัวอักษร (ซ้าย) + ตัวเลข (ขวา)
     fields: {
-      date:       { top: 4.2, left: 148 },     // row1, col4: วันที่
-      payee:      { top: 12.7, left: 55 },     // row3, col3: ชื่อผู้รับเงิน (เว้น 1 บรรทัด)
-      amountText: { top: 21.2, left: 55 },     // row5, col3: ***จำนวนเงิน*** (เว้น 1 บรรทัด)
-      amountNum:  { top: 29.6, left: 148 },    // row7, col4: ตัวเลข (เว้น 1 บรรทัด)
+      date:       { top: 5, left: 124 },       // วันที่ มุมขวาบน (ตัวแรกเริ่มที่ 124mm)
+      payee:      { top: 15, left: 20 },       // Pay to: ชื่อผู้รับเงิน (เริ่มที่ 20mm)
+      amountText: { top: 24, left: 50 },       // The sum of: จำนวนเงินตัวอักษร (เริ่มที่ 50mm)
+      amountNum:  { top: 40, left: 135 },      // ฿ จำนวนเงินตัวเลข (top:40mm, left:135mm)
     }
   },
 
@@ -790,7 +790,7 @@ const CHQ_FORM_CONFIGS = {
     name: 'ใบนำฝาก ธ.กรุงเทพ (BBL-SV)',
     pageWidth: '210mm',
     pageHeight: '140mm',
-    fontSize: '11pt',
+    fontSize: '16pt',
     offsetTop: 0,
     offsetLeft: 0,
     // 1 row ≈ 4.23mm (1/6 inch dot matrix), col1≈0mm, col2≈20mm, col3≈55mm, col4≈90mm, col5≈125mm, col6≈155mm
@@ -826,7 +826,7 @@ const CHQ_FORM_CONFIGS = {
     name: 'ใบนำฝาก ธ.กรุงไทย (KTB-SV)',
     pageWidth: '210mm',
     pageHeight: '140mm',
-    fontSize: '11pt',
+    fontSize: '16pt',
     offsetTop: 0,
     offsetLeft: 0,
     fields: {
@@ -860,8 +860,9 @@ function generateChequeFormPositions(formType) {
 
   // Format date as DD/MM/YYYY (พ.ศ.)
   let dateStr = '';
-  if (date) {
-    const d = new Date(date);
+  const dateVal = date || new Date().toISOString().split('T')[0];
+  if (dateVal) {
+    const d = new Date(dateVal);
     dateStr = `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear() + 543}`;
   }
 
@@ -878,7 +879,18 @@ function generateChequeFormPositions(formType) {
   // === เช็ค BBL / UOB ===
   if (formType === 'BBL_CHQ' || formType === 'UOB_CHQ') {
     if (f.date && dateStr) {
-      pushPos('date', f.date.top + offsetTop + (fo.date_top||0), f.date.left + offsetLeft + (fo.date_left||0), dateStr);
+      // วันที่ในเช็ค: 8 ช่อง รวม 50mm (ช่องละ 6.25mm)
+      // แยกพิมพ์ทีละตัว ตัวเลขอยู่กึ่งกลางแต่ละช่อง
+      const dateDigits = dateStr.replace(/\//g, ''); // "15062569" (8 ตัว)
+      const totalWidth = 50; // mm รวมทั้งหมด
+      const charWidth = totalWidth / 8; // 6.25mm ต่อช่อง
+      const dateTop = f.date.top + offsetTop + (fo.date_top||0);
+      const dateLeft = f.date.left + offsetLeft + (fo.date_left||0);
+      for (let i = 0; i < dateDigits.length && i < 8; i++) {
+        // กึ่งกลางช่อง = left + (i * charWidth) + (charWidth/2) แล้วชดเชยความกว้างตัวอักษร (~1.5mm)
+        const centerOffset = (charWidth / 2) - 1.5;
+        positions.push({ top: dateTop, left: dateLeft + (i * charWidth) + centerOffset, text: dateDigits[i] });
+      }
     }
     if (f.payee && payee) {
       pushPos('payee', f.payee.top + offsetTop + (fo.payee_top||0), f.payee.left + offsetLeft + (fo.payee_left||0), payee);
@@ -886,7 +898,7 @@ function generateChequeFormPositions(formType) {
     if (f.amountText && amountText) {
       pushPos('amountText', f.amountText.top + offsetTop + (fo.amountText_top||0), f.amountText.left + offsetLeft + (fo.amountText_left||0), amountText);
     }
-    if (f.amountNum && amount > 0) {
+    if (f.amountNum) {
       pushPos('amountNum', f.amountNum.top + offsetTop + (fo.amountNum_top||0), f.amountNum.left + offsetLeft + (fo.amountNum_left||0), fmtMoney(amount));
     }
   }
@@ -963,17 +975,19 @@ function executePrintChequeForm() {
 
   const offsetTop = parseFloat(document.getElementById('printChqOffsetTop').value) || 0;
   const offsetLeft = parseFloat(document.getElementById('printChqOffsetLeft').value) || 0;
-  const orientation = document.getElementById('printChqOrientation').value;
   const pageWidth = document.getElementById('printChqPageWidth').value + 'mm';
   const pageHeight = document.getElementById('printChqPageHeight').value + 'mm';
+  const fontName = document.getElementById('printChqFont').value;
+  const fontSize = document.getElementById('printChqFontSize').value + 'pt';
 
   const printConfig = {
     ...config,
     offsetTop: config.offsetTop + offsetTop,
     offsetLeft: config.offsetLeft + offsetLeft,
-    orientation: orientation,
     pageWidth: pageWidth,
-    pageHeight: pageHeight
+    pageHeight: pageHeight,
+    fontFamily: `'${fontName}', serif`,
+    fontSize: fontSize
   };
 
   const positions = generateChequeFormPositions(formType);
@@ -1002,7 +1016,7 @@ function previewChequePrint() {
       <title>ตำแหน่ง - ${config.name}</title>
       <style>
         body {
-          font-family: 'Courier New', monospace;
+          font-family: 'Angsana New', 'AngsanaUPC', serif;
           margin: 20px;
           padding: 0;
           position: relative;
@@ -1251,7 +1265,7 @@ const BBL_PAYIN_CONFIG = {
   // ปรับค่า offset ทั้งหมดได้ที่นี่ (mm)
   offsetTop: 0,      // เลื่อนลงทั้งหมด
   offsetLeft: 0,     // เลื่อนขวาทั้งหมด
-  fontSize: '11pt',
+  fontSize: '16pt',
   // ขนาดกระดาษ pay-in BBL (กระดาษต่อเนื่อง)
   pageWidth: '210mm',
   pageHeight: '140mm',
@@ -1295,7 +1309,7 @@ const BBL_PAYIN_CONFIG = {
 const UOB_PAYIN_CONFIG = {
   offsetTop: 0,
   offsetLeft: 0,
-  fontSize: '11pt',
+  fontSize: '16pt',
   pageWidth: '210mm',
   pageHeight: '140mm',
   // UOB pay-in เว้นบรรทัด ทุก field ห่างกัน ~8.46mm (2 rows)
@@ -1369,11 +1383,11 @@ function generatePayinPositions(data, config) {
 
   // ประเภทบัญชี (พิมพ์ X ที่ช่อง checkbox)
   if (data.accountType === 'ออมทรัพย์') {
-    positions.push({ top: f.typeSavings.top + oT, left: f.typeSavings.left + oL, text: 'X' });
+
   } else if (data.accountType === 'กระแสรายวัน') {
-    positions.push({ top: f.typeCurrent.top + oT, left: f.typeCurrent.left + oL, text: 'X' });
+
   } else if (data.accountType === 'ฝากประจำ') {
-    positions.push({ top: f.typeFixed.top + oT, left: f.typeFixed.left + oL, text: 'X' });
+
   }
 
   // เงินสด
@@ -1583,7 +1597,7 @@ function openPayinAdjustment() {
       <title>ปรับตำแหน่ง Pay-in ${data.bank}</title>
       <style>
         body {
-          font-family: 'Courier New', monospace;
+          font-family: 'Angsana New', 'AngsanaUPC', serif;
           margin: 0;
           padding: 0;
           position: relative;
@@ -1646,24 +1660,29 @@ function previewPayinKTB() {
   const depositor = document.getElementById('ktb_depositor').value;
   const amount = parseFloat(document.getElementById('ktb_amount').value) || 0;
 
-  const W = 60;
-  const line = '='.repeat(W);
-  let txt = '';
-  txt += line + '\n';
-  txt += centerText('ใบรับฝากเงิน (Deposit Slip)', W) + '\n';
-  txt += centerText('ธนาคารกรุงไทย จำกัด (มหาชน)', W) + '\n';
-  txt += line + '\n';
-  txt += `สาขา: ${branch}          วันที่: ${formatPayinDate(date)}\n`;
-  txt += '\n';
-  txt += `ชื่อบัญชี: ${accountName}\n`;
-  txt += `เลขที่บัญชี: ${accountNo}\n`;
-  txt += '\n';
-  txt += `ผู้นำฝาก: ${depositor}\n`;
-  txt += `จำนวนเงิน: ${fmtMoney(amount)} บาท\n`;
-  txt += `(${numberToThaiText(amount)})\n`;
-  txt += line + '\n';
-
-  document.getElementById('ktb_preview').textContent = txt;
+  const html = `
+    <div style="border:2px solid #00a7e1; border-radius:8px; padding:12px; font-size:11px; font-family:'Prompt',sans-serif; min-height:200px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+        <div><strong style="color:#00a7e1; font-size:14px;">Krungthai</strong><br><span style="font-size:9px;">ธนาคารกรุงไทย</span></div>
+        <div style="background:#00a7e1; color:#fff; padding:4px 12px; border-radius:4px; font-weight:600;">ใบรับฝากเงิน DEPOSIT SLIP</div>
+      </div>
+      <table style="width:100%; border-collapse:collapse; margin-bottom:10px;">
+        <tr>
+          <td style="width:50%">สาขา Branch: <strong>${branch||'___'}</strong></td>
+          <td style="width:50%">วันที่และเวลา: <strong>${formatPayinDate(date)}</strong></td>
+        </tr>
+      </table>
+      <div style="border:1px solid #ddd; padding:10px; border-radius:4px; margin-bottom:10px; background:#fafafa;">
+        <div>ชื่อบัญชี: <strong>${accountName||'___'}</strong></div>
+        <div>เลขที่บัญชี: <strong style="color:#c62828;">${accountNo||'___'}</strong></div>
+      </div>
+      <div style="border-top:2px solid #00a7e1; padding-top:10px; display:flex; justify-content:space-between;">
+        <div>ลายมือชื่อผู้นำฝาก/Depositor:<br><strong>${depositor||'___'}</strong></div>
+        <div style="text-align:right;">จำนวนเงิน/Amount:<br><strong style="font-size:14px; color:#00a7e1;">${fmtMoney(amount)}</strong><br><span style="font-size:9px;">(${numberToThaiText(amount)})</span></div>
+      </div>
+    </div>
+  `;
+  document.getElementById('ktb_preview').innerHTML = html;
 }
 
 function printPayinKTB() {
@@ -1678,7 +1697,7 @@ function printPayinKTB() {
   const fo = getFieldOffsets('KTB');
 
   const positions = [];
-  const config = { pageWidth: document.getElementById('ktb_pageWidth').value + 'mm', pageHeight: document.getElementById('ktb_pageHeight').value + 'mm', fontSize: '11pt', orientation: document.getElementById('ktb_orientation').value };
+  const config = { pageWidth: document.getElementById('ktb_pageWidth').value + 'mm', pageHeight: document.getElementById('ktb_pageHeight').value + 'mm', fontSize: '16pt' };
 
   let dateStr = '';
   if (date) {
@@ -1744,32 +1763,47 @@ function previewPayinUOB() {
   const depositor = document.getElementById('uob_depositor').value;
   const cheques = getUobCheques();
 
-  const W = 65;
-  const line = '='.repeat(W);
-  const dash = '-'.repeat(W);
-  let txt = '';
-  txt += line + '\n';
-  txt += centerText('ใบนำฝากเช็ค (Cheque Deposit Slip)', W) + '\n';
-  txt += centerText('ธนาคารยูโอบี จำกัด (มหาชน) / UOB', W) + '\n';
-  txt += line + '\n';
-  txt += `วันที่: ${formatPayinDate(date)}   เพื่อสาขา: ${branch}\n`;
-  txt += `ประเภทบัญชี: ${accountType}\n`;
-  txt += `ชื่อบัญชี: ${accountName}\n`;
-  txt += `หมายเลขบัญชี: ${accountNo}\n`;
-  txt += dash + '\n';
-  txt += `${padRight('เช็คธนาคาร/สาขา', 25)}${padRight('เลขที่เช็ค', 18)}${padLeft('จำนวนเงิน', 16)}\n`;
-  txt += dash + '\n';
+  let chqRows = '';
   cheques.forEach(c => {
-    txt += `${padRight(c.bank, 25)}${padRight(c.no, 18)}${padLeft(fmtMoney(c.amount), 16)}\n`;
+    chqRows += `<tr><td style="border:1px solid #ddd;padding:3px;">${c.bank||''}</td><td style="border:1px solid #ddd;padding:3px;">${c.no||''}</td><td style="border:1px solid #ddd;padding:3px;text-align:right;">${fmtMoney(c.amount)}</td></tr>`;
   });
-  if (cheques.length === 0) txt += centerText('- ไม่มีรายการ -', W) + '\n';
-  txt += dash + '\n';
-  txt += `รวมเงินฝาก: ${fmtMoney(totalAmount)} บาท\n`;
-  txt += `(${numberToThaiText(totalAmount)})\n`;
-  txt += `ผู้ทำรายการ: ${depositor}\n`;
-  txt += line + '\n';
+  if (cheques.length === 0) chqRows = '<tr><td colspan="3" style="text-align:center;color:#999;border:1px solid #ddd;padding:3px;">- ไม่มีรายการ -</td></tr>';
 
-  document.getElementById('uob_preview').textContent = txt;
+  const html = `
+    <div style="border:2px solid #003d6b; border-radius:8px; padding:12px; font-size:11px; font-family:'Prompt',sans-serif; min-height:280px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+        <div><strong style="color:#003d6b; font-size:14px;">UOB</strong><br><span style="font-size:9px;">ธนาคารยูโอบี จำกัด (มหาชน)</span></div>
+        <div style="color:#003d6b; font-weight:600;">ใบนำฝากเช็ค Cheque Deposit Slip</div>
+      </div>
+      <table style="width:100%; border-collapse:collapse; margin-bottom:6px;">
+        <tr>
+          <td>วันที่: <strong>${formatPayinDate(date)}</strong></td>
+          <td>เพื่อสาขา: <strong>${branch||'___'}</strong></td>
+        </tr>
+      </table>
+      <table style="width:100%; border-collapse:collapse; margin-bottom:6px;">
+        <tr>
+          <td>ประเภทบัญชี: <strong>${accountType}</strong></td>
+        </tr>
+        <tr>
+          <td>ชื่อบัญชี: <strong>${accountName||'___'}</strong></td>
+          <td>หมายเลขบัญชี: <strong style="color:#c62828;">${accountNo||'___'}</strong></td>
+        </tr>
+      </table>
+      <table style="width:100%; border-collapse:collapse; font-size:10px; margin-top:8px;">
+        <thead style="background:#003d6b; color:#fff;">
+          <tr><th style="border:1px solid #ddd;padding:3px;">เช็คธนาคาร/สาขา</th><th style="border:1px solid #ddd;padding:3px;">เลขที่เช็ค</th><th style="border:1px solid #ddd;padding:3px;">จำนวนเงิน</th></tr>
+        </thead>
+        <tbody>${chqRows}</tbody>
+      </table>
+      <div style="margin-top:8px; padding:6px; border-top:2px solid #003d6b; display:flex; justify-content:space-between;">
+        <span>จำนวนเงินตัวอักษร: <strong>${numberToThaiText(totalAmount)}</strong></span>
+        <span>รวมเงินฝาก: <strong style="color:#003d6b;">${fmtMoney(totalAmount)}</strong></span>
+      </div>
+      <div style="margin-top:4px;">ผู้ทำรายการ: <strong>${depositor||'___'}</strong></div>
+    </div>
+  `;
+  document.getElementById('uob_preview').innerHTML = html;
 }
 
 function printPayinUOB() {
@@ -1786,7 +1820,7 @@ function printPayinUOB() {
   const fo = getFieldOffsets('UOB');
 
   const positions = [];
-  const config = { pageWidth: document.getElementById('uob_pageWidth').value + 'mm', pageHeight: document.getElementById('uob_pageHeight').value + 'mm', fontSize: '11pt', orientation: document.getElementById('uob_orientation').value };
+  const config = { pageWidth: document.getElementById('uob_pageWidth').value + 'mm', pageHeight: document.getElementById('uob_pageHeight').value + 'mm', fontSize: '16pt' };
 
   let dateStr = '';
   if (date) {
@@ -1799,9 +1833,9 @@ function printPayinUOB() {
 
   const atTop = 48 + offsetTop + (fo.accountType_top||0);
   const atLeft = fo.accountType_left||0;
-  if (accountType === 'กระแสรายวัน') positions.push({ top: atTop, left: 27 + offsetLeft + atLeft, text: '●' });
-  else if (accountType === 'ออมทรัพย์') positions.push({ top: atTop, left: 62 + offsetLeft + atLeft, text: '●' });
-  else if (accountType === 'ฝากประจำ') positions.push({ top: atTop, left: 100 + offsetLeft + atLeft, text: '●' });
+
+
+
 
   if (accountName) positions.push({ top: 55 + offsetTop + (fo.accountName_top||0), left: 42 + offsetLeft + (fo.accountName_left||0), text: accountName });
   if (accountNo) positions.push({ top: 55 + offsetTop + (fo.accountNo_top||0), left: 138 + offsetLeft + (fo.accountNo_left||0), text: accountNo });
@@ -1884,31 +1918,51 @@ function previewPayinBBL() {
   const amountWords = document.getElementById('bbl_amountWords').value;
   const cheques = getBblCheques();
 
-  const W = 70;
-  const line = '='.repeat(W);
-  const dash = '-'.repeat(W);
-  let txt = '';
-  txt += line + '\n';
-  txt += centerText('ชุดฝากเช็ค (Deposit Slip for Cheque)', W) + '\n';
-  txt += centerText('ธนาคารกรุงเทพ จำกัด (มหาชน) / Bangkok Bank', W) + '\n';
-  txt += line + '\n';
-  txt += `สาขา: ${branch}       วันที่: ${formatPayinDate(date)}    ประเภท: ${accountType}\n`;
-  txt += `ผู้นำฝาก: ${depositor}       โทร: ${phone}\n`;
-  txt += `ชื่อบัญชี: ${accountName}\n`;
-  txt += `เลขที่บัญชี: ${accountNo}    สาขาเจ้าของบัญชี: ${accountBranch}\n`;
-  txt += dash + '\n';
-  txt += `${padRight('เลขที่เช็ค', 12)}${padRight('ธนาคาร/สาขา', 22)}${padRight('วันที่เช็ค', 14)}${padLeft('จำนวนเงิน', 16)}\n`;
-  txt += dash + '\n';
+  let chqRows = '';
   cheques.forEach(c => {
-    txt += `${padRight(c.no, 12)}${padRight(c.bank, 22)}${padRight(formatPayinDate(c.date), 14)}${padLeft(fmtMoney(c.amount), 16)}\n`;
+    chqRows += `<tr><td>${c.no||''}</td><td>${c.bank||''}</td><td>${formatPayinDate(c.date)}</td><td style="text-align:right">${fmtMoney(c.amount)}</td></tr>`;
   });
-  if (cheques.length === 0) txt += centerText('- ไม่มีรายการ -', W) + '\n';
-  txt += dash + '\n';
-  txt += `จำนวนเงินรวม (ตัวอักษร): ${amountWords}\n`;
-  txt += `จำนวนเงินรวม (ตัวเลข): ${fmtMoney(totalAmount)} บาท\n`;
-  txt += line + '\n';
+  if (cheques.length === 0) chqRows = '<tr><td colspan="4" style="text-align:center;color:#999;">- ไม่มีรายการ -</td></tr>';
 
-  document.getElementById('bbl_preview').textContent = txt;
+  const html = `
+    <div style="border:2px solid #1a237e; border-radius:8px; padding:12px; font-size:11px; font-family:'Prompt',sans-serif; position:relative; min-height:280px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+        <div><strong style="color:#1a237e; font-size:13px;">Bangkok Bank</strong><br><span style="font-size:10px;">ธนาคารกรุงเทพ</span></div>
+        <div style="background:#1a237e; color:#fff; padding:4px 12px; border-radius:4px; font-weight:600;">ชุดฝากเช็ค Deposit Slip for Cheque</div>
+      </div>
+      <table style="width:100%; border-collapse:collapse; margin-bottom:6px;">
+        <tr>
+          <td style="width:33%">สาขา: <strong>${branch||'___'}</strong></td>
+          <td style="width:33%">วันที่: <strong>${formatPayinDate(date)}</strong></td>
+          <td style="width:33%">ประเภท: <strong>${accountType}</strong></td>
+        </tr>
+      </table>
+      <table style="width:100%; border-collapse:collapse; margin-bottom:6px;">
+        <tr>
+          <td style="width:33%">ผู้นำฝาก: <strong>${depositor||'___'}</strong></td>
+          <td style="width:33%">โทร: <strong>${phone||'___'}</strong></td>
+          <td style="width:33%">เลขที่บัญชี: <strong style="color:#c62828;">${accountNo||'___'}</strong></td>
+        </tr>
+      </table>
+      <table style="width:100%; border-collapse:collapse; margin-bottom:8px;">
+        <tr>
+          <td style="width:60%">ชื่อบัญชี: <strong>${accountName||'___'}</strong></td>
+          <td style="width:40%">สาขาเจ้าของบัญชี: <strong>${accountBranch||'___'}</strong></td>
+        </tr>
+      </table>
+      <table style="width:100%; border-collapse:collapse; font-size:10px; border:1px solid #ddd;">
+        <thead style="background:#fff8e1;">
+          <tr><th style="border:1px solid #ddd; padding:3px;">หมายเลขเช็ค</th><th style="border:1px solid #ddd; padding:3px;">ชื่อธนาคาร/สาขา</th><th style="border:1px solid #ddd; padding:3px;">เช็ควันที่</th><th style="border:1px solid #ddd; padding:3px;">จำนวนเงิน</th></tr>
+        </thead>
+        <tbody>${chqRows}</tbody>
+      </table>
+      <div style="margin-top:8px; background:#fff8e1; padding:6px; border:1px solid #f9a825; border-radius:4px; display:flex; justify-content:space-between;">
+        <span>จำนวนเงินรวม (ตัวอักษร): <strong>${amountWords||'___'}</strong></span>
+        <span>จำนวนเงินรวม: <strong style="color:#1a237e;">${fmtMoney(totalAmount)}</strong></span>
+      </div>
+    </div>
+  `;
+  document.getElementById('bbl_preview').innerHTML = html;
 }
 
 function printPayinBBL() {
@@ -1928,7 +1982,7 @@ function printPayinBBL() {
   const fo = getFieldOffsets('BBL');
 
   const positions = [];
-  const config = { pageWidth: document.getElementById('bbl_pageWidth').value + 'mm', pageHeight: document.getElementById('bbl_pageHeight').value + 'mm', fontSize: '10pt', orientation: document.getElementById('bbl_orientation').value };
+  const config = { pageWidth: document.getElementById('bbl_pageWidth').value + 'mm', pageHeight: document.getElementById('bbl_pageHeight').value + 'mm', fontSize: '16pt' };
 
   let dateStr = '';
   if (date) {
@@ -1943,10 +1997,10 @@ function printPayinBBL() {
   // Line 1: ประเภทบัญชี checkboxes (กลาง-ขวา ตาม layout: ออมทรัพย์|กระแสรายวัน|ประจำ|สินมัธยะ)
   const atTop = 16 + offsetTop + (fo.accountType_top||0);
   const atLeft = fo.accountType_left||0;
-  if (accountType === 'ออมทรัพย์') positions.push({ top: atTop, left: 80 + offsetLeft + atLeft, text: '●' });
-  else if (accountType === 'กระแสรายวัน') positions.push({ top: atTop, left: 105 + offsetLeft + atLeft, text: '●' });
-  else if (accountType === 'สินมัธยะ') positions.push({ top: atTop, left: 120 + offsetLeft + atLeft, text: '●' });
-  else if (accountType === 'ฝากประจำ') positions.push({ top: atTop, left: 95 + offsetLeft + atLeft, text: '●' });
+
+
+
+
 
   // Line 2: วันที่ (ซ้าย)
   if (dateStr) positions.push({ top: 26 + offsetTop + (fo.date_top||0), left: 15 + offsetLeft + (fo.date_left||0), text: dateStr });
@@ -2284,15 +2338,12 @@ function openFieldAdjustment(formKey, fields, config) {
     const oT = offsets[f.name + '_top'] || 0;
     const oL = offsets[f.name + '_left'] || 0;
     const oS = offsets[f.name + '_spacing'] || 0;
-    const showSpacing = (f.name.toLowerCase().includes('account') || f.name.toLowerCase().includes('no') || f.name.toLowerCase().includes('cheque'));
     fieldsHtml += `
       <tr>
         <td><strong>${f.label}</strong></td>
-        <td>${f.defaultTop}</td>
-        <td>${f.defaultLeft}</td>
         <td><input type="number" step="0.5" value="${oT}" id="fo_${f.name}_top" style="width:60px;"></td>
         <td><input type="number" step="0.5" value="${oL}" id="fo_${f.name}_left" style="width:60px;"></td>
-        <td><input type="number" step="0.5" value="${oS}" id="fo_${f.name}_spacing" style="width:60px;" ${showSpacing ? '' : 'disabled'} title="${showSpacing ? 'ระยะห่างตัวอักษร (mm)' : 'ไม่ใช้'}"></td>
+        <td><input type="number" step="0.5" value="${oS}" id="fo_${f.name}_spacing" style="width:60px;" title="ระยะห่างตัวอักษร (mm)"></td>
       </tr>
     `;
   });
@@ -2318,8 +2369,6 @@ function openFieldAdjustment(formKey, fields, config) {
         <thead class="table-dark">
           <tr>
             <th>ชื่อช่อง</th>
-            <th>Top เดิม</th>
-            <th>Left เดิม</th>
             <th>เลื่อนลง/ขึ้น</th>
             <th>เลื่อนขวา/ซ้าย</th>
             <th>ระยะห่างอักษร</th>
@@ -2430,10 +2479,10 @@ function getCHQFields(formType) {
   }
   if (formType === 'UOB_CHQ') {
     return [
-      { name: 'date', label: 'วันที่', defaultTop: 4.2, defaultLeft: 148 },
-      { name: 'payee', label: 'ผู้รับเงิน', defaultTop: 12.7, defaultLeft: 55 },
-      { name: 'amountText', label: 'จำนวนเงินตัวอักษร', defaultTop: 21.2, defaultLeft: 55 },
-      { name: 'amountNum', label: 'จำนวนเงินตัวเลข', defaultTop: 29.6, defaultLeft: 148 },
+      { name: 'date', label: 'วันที่', defaultTop: 5, defaultLeft: 155 },
+      { name: 'payee', label: 'ผู้รับเงิน (Pay to)', defaultTop: 15, defaultLeft: 38 },
+      { name: 'amountText', label: 'จำนวนเงินตัวอักษร (The sum of)', defaultTop: 24, defaultLeft: 38 },
+      { name: 'amountNum', label: 'จำนวนเงินตัวเลข (฿)', defaultTop: 24, defaultLeft: 145 },
     ];
   }
   if (formType === 'BBL_SV') {
