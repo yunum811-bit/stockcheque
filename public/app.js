@@ -584,13 +584,19 @@ function openPrintWindow(textContent, title, orientation) {
 }
 
 // Open print window for pay-in form overlay printing (dot matrix on pre-printed form)
-// ใส่กระดาษด้านกว้างลงเครื่อง + Portrait → หมุนตำแหน่ง 90 องศาในโค้ด
+// LQ-310: ใส่กระดาษด้านกว้าง (173mm) ลง, หัวพิมพ์วิ่ง 87mm (ซ้าย→ขวา)
+// Driver: Width=87mm (หัวพิมพ์วิ่ง), Height=173mm (กระดาษป้อน), Portrait
 function openPayinPrintWindow(positions, title, config) {
   const printWin = window.open('', '_blank', 'width=800,height=600');
   
-  // กระดาษใส่ด้านกว้าง (173mm) ลงเครื่อง + Portrait
-  // หมุน 90 องศา: top เดิม → left ใหม่ (กลับด้าน), left เดิม → top ใหม่
-  const paperHeight = parseFloat(config.pageHeight) || 87; // mm (ด้านสูงของเช็ค)
+  const paperWidth = parseFloat(config.pageWidth) || 173;  // mm กว้างจริงของเช็ค
+  const paperHeight = parseFloat(config.pageHeight) || 87; // mm สูงจริงของเช็ค
+
+  // สำหรับ driver LQ-310: Width=สูง(87), Height=กว้าง(173), Portrait
+  // browser จะเห็นหน้ากระดาษเป็น: กว้าง=87mm, สูง=173mm
+  // ดังนั้นต้องสลับ top↔left:
+  // - top ในโค้ด (ระยะจากบนลง บนเช็คจริง) → left ใน browser (แนวที่หัวพิมพ์วิ่ง)
+  // - left ในโค้ด (ระยะจากซ้ายไปขวา บนเช็คจริง) → top ใน browser (แนวที่กระดาษวิ่ง)
 
   let elementsHtml = '';
   positions.forEach(p => {
@@ -601,16 +607,15 @@ function openPayinPrintWindow(positions, title, config) {
     const fontFamily = config.fontFamily || "'Angsana New','AngsanaUPC',serif";
     const fontSize = config.fontSize || '16pt';
     
-    // หมุน 90 องศาตามเข็ม สำหรับใส่กระดาษด้านกว้างลง + Portrait
-    // newTop = left เดิม
-    // newLeft = paperHeight - top เดิม (กลับทิศ)
-    const newTop = p.left;
-    const newLeft = paperHeight - p.top;
+    // สลับ: top(เช็ค) → left(browser), left(เช็ค) → top(browser)
+    const browserTop = p.left;
+    const browserLeft = p.top;
     
-    const style = `position:absolute; top:${newTop}mm; left:${newLeft}mm; font-family:${fontFamily}; font-size:${p.fontSize || fontSize}; white-space:pre; ${extraStyle}`;
+    const style = `position:absolute; top:${browserTop}mm; left:${browserLeft}mm; font-family:${fontFamily}; font-size:${p.fontSize || fontSize}; white-space:pre; ${extraStyle}`;
     elementsHtml += `<div style="${style}">${p.text}</div>\n`;
   });
 
+  // @page size: 87mm(width) x 173mm(height) = ตรงกับ driver
   printWin.document.write(`
     <!DOCTYPE html>
     <html>
@@ -618,6 +623,7 @@ function openPayinPrintWindow(positions, title, config) {
       <title>${title}</title>
       <style>
         @page {
+          size: ${paperHeight}mm ${paperWidth}mm;
           margin: 0;
         }
         * { margin: 0; padding: 0; }
@@ -627,13 +633,13 @@ function openPayinPrintWindow(positions, title, config) {
           padding: 0;
           position: relative;
           width: ${paperHeight}mm;
-          height: 200mm;
+          height: ${paperWidth}mm;
           overflow: visible;
           -webkit-print-color-adjust: exact;
         }
         @media print {
           html, body { margin: 0; padding: 0; }
-          @page { margin: 0; }
+          @page { size: ${paperHeight}mm ${paperWidth}mm; margin: 0; }
         }
       </style>
     </head>
@@ -751,10 +757,10 @@ const CHQ_FORM_CONFIGS = {
     offsetTop: 0,
     offsetLeft: 0,
     fields: {
-      date:       { top: 5, left: 110 },       // วันที่ มุมขวาบน (110mm + 50mm = 160mm ภายใน 173mm)
-      payee:      { top: 15, left: 20 },       // ชื่อผู้รับเงิน
-      amountText: { top: 24, left: 50 },       // จำนวนเงินตัวอักษร
-      amountNum:  { top: 40, left: 110 },      // จำนวนเงินตัวเลข
+      date:       { top: 5, left: 110 },       // วันที่ มุมขวาบน
+      payee:      { top: 20, left: 20 },       // ชื่อผู้รับเงิน
+      amountText: { top: 30, left: 20 },       // จำนวนเงินตัวอักษร
+      amountNum:  { top: 30, left: 110 },      // จำนวนเงินตัวเลข
     }
   },
 
@@ -773,10 +779,10 @@ const CHQ_FORM_CONFIGS = {
     // Pay to: 2 บรรทัด (ชื่อผู้รับเงิน)
     // The sum of: จำนวนเงินตัวอักษร (ซ้าย) + ตัวเลข (ขวา)
     fields: {
-      date:       { top: 5, left: 110 },       // วันที่ มุมขวาบน (110mm + 50mm = 160mm ภายใน 173mm)
-      payee:      { top: 15, left: 20 },       // Pay to: ชื่อผู้รับเงิน
-      amountText: { top: 24, left: 50 },       // The sum of: จำนวนเงินตัวอักษร
-      amountNum:  { top: 40, left: 110 },      // ฿ จำนวนเงินตัวเลข
+      date:       { top: 5, left: 110 },       // วันที่ มุมขวาบน
+      payee:      { top: 20, left: 20 },       // Pay to: ชื่อผู้รับเงิน
+      amountText: { top: 30, left: 20 },       // The sum of: จำนวนเงินตัวอักษร
+      amountNum:  { top: 30, left: 110 },      // ฿ จำนวนเงินตัวเลข (ขวา ด้านล่าง)
     }
   },
 
