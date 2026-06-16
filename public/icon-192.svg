@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="192" height="192" viewBox="0 0 192 192">
+  <rect width="192" height="192" rx="28.799999999999997" fill="#1b5e20"/>
+  <rect x="9.600000000000001" y="9.600000000000001" width="172.8" height="172.8" rx="19.200000000000003" fill="none" stroke="#f9a825" stroke-width="3.84"/>
+  <text x="50%" y="38%" text-anchor="middle" fill="#ffffff" font-family="Arial" font-size="34.56" font-weight="bold">Stock</text>
+  <text x="50%" y="58%" text-anchor="middle" fill="#f9a825" font-family="Arial" font-size="34.56" font-weight="bold">Cheque</text>
+  <text x="50%" y="78%" text-anchor="middle" fill="#ffffff" font-family="Arial" font-size="19.200000000000003">SF</text>
+</svg>

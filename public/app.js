@@ -584,12 +584,14 @@ function openPrintWindow(textContent, title, orientation) {
 }
 
 // Open print window for pay-in form overlay printing (dot matrix on pre-printed form)
-// Uses absolute positioning to place data in exact form fields
+// ใส่กระดาษด้านกว้างลงเครื่อง + Portrait → หมุนตำแหน่ง 90 องศาในโค้ด
 function openPayinPrintWindow(positions, title, config) {
-  const orientation = config.orientation || 'portrait';
   const printWin = window.open('', '_blank', 'width=800,height=600');
   
-  // Build positioned elements
+  // กระดาษใส่ด้านกว้าง (173mm) ลงเครื่อง + Portrait
+  // หมุน 90 องศา: top เดิม → left ใหม่ (กลับด้าน), left เดิม → top ใหม่
+  const paperHeight = parseFloat(config.pageHeight) || 87; // mm (ด้านสูงของเช็ค)
+
   let elementsHtml = '';
   positions.forEach(p => {
     let extraStyle = '';
@@ -598,16 +600,17 @@ function openPayinPrintWindow(positions, title, config) {
     }
     const fontFamily = config.fontFamily || "'Angsana New','AngsanaUPC',serif";
     const fontSize = config.fontSize || '16pt';
-    const style = `position:absolute; top:${p.top}mm; left:${p.left}mm; font-family:${fontFamily}; font-size:${p.fontSize || fontSize}; white-space:pre; ${extraStyle}`;
+    
+    // หมุน 90 องศาตามเข็ม สำหรับใส่กระดาษด้านกว้างลง + Portrait
+    // newTop = left เดิม
+    // newLeft = paperHeight - top เดิม (กลับทิศ)
+    const newTop = p.left;
+    const newLeft = paperHeight - p.top;
+    
+    const style = `position:absolute; top:${newTop}mm; left:${newLeft}mm; font-family:${fontFamily}; font-size:${p.fontSize || fontSize}; white-space:pre; ${extraStyle}`;
     elementsHtml += `<div style="${style}">${p.text}</div>\n`;
   });
 
-  // ถ้า landscape ให้สลับ width/height
-  let pageW = config.pageWidth || '210mm';
-  let pageH = config.pageHeight || '148mm';
-
-  // Epson LQ-310: body ใช้ขนาดจริง, ไม่กำหนด @page size (ให้ driver ควบคุม)
-  // width = ด้านกว้างของฟอร์ม, height = ด้านสูงของฟอร์ม
   printWin.document.write(`
     <!DOCTYPE html>
     <html>
@@ -623,8 +626,8 @@ function openPayinPrintWindow(positions, title, config) {
           margin: 0;
           padding: 0;
           position: relative;
-          width: 300mm;
-          height: 300mm;
+          width: ${paperHeight}mm;
+          height: 200mm;
           overflow: visible;
           -webkit-print-color-adjust: exact;
         }
@@ -748,10 +751,10 @@ const CHQ_FORM_CONFIGS = {
     offsetTop: 0,
     offsetLeft: 0,
     fields: {
-      date:       { top: 4.2, left: 118 },     // วันที่ มุมขวาบน (เริ่ม 118mm, 8ช่อง x 6.25 = 50mm → จบ 168mm)
-      payee:      { top: 14, left: 20 },       // ชื่อผู้รับเงิน
-      amountText: { top: 22, left: 20 },       // จำนวนเงินตัวอักษร
-      amountNum:  { top: 14, left: 120 },      // จำนวนเงินตัวเลข (ขวา)
+      date:       { top: 5, left: 110 },       // วันที่ มุมขวาบน (110mm + 50mm = 160mm ภายใน 173mm)
+      payee:      { top: 15, left: 20 },       // ชื่อผู้รับเงิน
+      amountText: { top: 24, left: 50 },       // จำนวนเงินตัวอักษร
+      amountNum:  { top: 40, left: 110 },      // จำนวนเงินตัวเลข
     }
   },
 
@@ -770,10 +773,10 @@ const CHQ_FORM_CONFIGS = {
     // Pay to: 2 บรรทัด (ชื่อผู้รับเงิน)
     // The sum of: จำนวนเงินตัวอักษร (ซ้าย) + ตัวเลข (ขวา)
     fields: {
-      date:       { top: 5, left: 124 },       // วันที่ มุมขวาบน (ตัวแรกเริ่มที่ 124mm)
-      payee:      { top: 15, left: 20 },       // Pay to: ชื่อผู้รับเงิน (เริ่มที่ 20mm)
-      amountText: { top: 24, left: 50 },       // The sum of: จำนวนเงินตัวอักษร (เริ่มที่ 50mm)
-      amountNum:  { top: 40, left: 135 },      // ฿ จำนวนเงินตัวเลข (top:40mm, left:135mm)
+      date:       { top: 5, left: 110 },       // วันที่ มุมขวาบน (110mm + 50mm = 160mm ภายใน 173mm)
+      payee:      { top: 15, left: 20 },       // Pay to: ชื่อผู้รับเงิน
+      amountText: { top: 24, left: 50 },       // The sum of: จำนวนเงินตัวอักษร
+      amountNum:  { top: 40, left: 110 },      // ฿ จำนวนเงินตัวเลข
     }
   },
 
@@ -2524,4 +2527,9 @@ function openCHQFieldAdjust() {
 
 function openPrinterSetupGuide() {
   window.open('/printer-setup-guide.html', '_blank', 'width=750,height=800');
+}
+
+// ============ PWA SERVICE WORKER ============
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js').catch(() => {});
 }
