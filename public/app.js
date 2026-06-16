@@ -584,20 +584,17 @@ function openPrintWindow(textContent, title, orientation) {
 }
 
 // Open print window for pay-in form overlay printing (dot matrix on pre-printed form)
-// LQ-310: ใส่กระดาษด้านกว้าง (173mm) ลง, หัวพิมพ์วิ่ง 87mm (ซ้าย→ขวา)
-// Driver: Width=87mm (หัวพิมพ์วิ่ง), Height=173mm (กระดาษป้อน), Portrait
+// LQ-310: ใส่กระดาษด้านกว้าง (173mm) ลง, พิมพ์จากซ้ายไปขวาตามแนว 173mm
+// Driver: Width=173mm, Height=87mm, Portrait
 function openPayinPrintWindow(positions, title, config) {
   const printWin = window.open('', '_blank', 'width=800,height=600');
   
-  const paperWidth = parseFloat(config.pageWidth) || 173;  // mm กว้างจริงของเช็ค
-  const paperHeight = parseFloat(config.pageHeight) || 87; // mm สูงจริงของเช็ค
+  const paperWidth = parseFloat(config.pageWidth) || 173;  // mm กว้างจริงของฟอร์ม
+  const paperHeight = parseFloat(config.pageHeight) || 87; // mm สูงจริงของฟอร์ม
 
-  // สำหรับ driver LQ-310: Width=สูง(87), Height=กว้าง(173), Portrait
-  // browser จะเห็นหน้ากระดาษเป็น: กว้าง=87mm, สูง=173mm
-  // ดังนั้นต้องสลับ top↔left:
-  // - top ในโค้ด (ระยะจากบนลง บนเช็คจริง) → left ใน browser (แนวที่หัวพิมพ์วิ่ง)
-  // - left ในโค้ด (ระยะจากซ้ายไปขวา บนเช็คจริง) → top ใน browser (แนวที่กระดาษวิ่ง)
-
+  // ไม่สลับ ไม่หมุน — ใช้ตรงๆ
+  // left = ซ้ายไปขวา (0 → 173mm)
+  // top = บนลงล่าง (0 → 87mm)
   let elementsHtml = '';
   positions.forEach(p => {
     let extraStyle = '';
@@ -607,15 +604,11 @@ function openPayinPrintWindow(positions, title, config) {
     const fontFamily = config.fontFamily || "'Angsana New','AngsanaUPC',serif";
     const fontSize = config.fontSize || '16pt';
     
-    // สลับ: top(เช็ค) → left(browser), left(เช็ค) → top(browser)
-    const browserTop = p.left;
-    const browserLeft = p.top;
-    
-    const style = `position:absolute; top:${browserTop}mm; left:${browserLeft}mm; font-family:${fontFamily}; font-size:${p.fontSize || fontSize}; white-space:pre; ${extraStyle}`;
+    const style = `position:absolute; top:${p.top}mm; left:${p.left}mm; font-family:${fontFamily}; font-size:${p.fontSize || fontSize}; white-space:pre; ${extraStyle}`;
     elementsHtml += `<div style="${style}">${p.text}</div>\n`;
   });
 
-  // @page size: 87mm(width) x 173mm(height) = ตรงกับ driver
+  // @page size: กว้าง x สูง (173 x 87) ตรงตามที่ใส่กระดาษ
   printWin.document.write(`
     <!DOCTYPE html>
     <html>
@@ -623,7 +616,7 @@ function openPayinPrintWindow(positions, title, config) {
       <title>${title}</title>
       <style>
         @page {
-          size: ${paperHeight}mm ${paperWidth}mm;
+          size: ${paperWidth}mm ${paperHeight}mm;
           margin: 0;
         }
         * { margin: 0; padding: 0; }
@@ -632,14 +625,14 @@ function openPayinPrintWindow(positions, title, config) {
           margin: 0;
           padding: 0;
           position: relative;
-          width: ${paperHeight}mm;
-          height: ${paperWidth}mm;
+          width: ${paperWidth}mm;
+          height: ${paperHeight}mm;
           overflow: visible;
           -webkit-print-color-adjust: exact;
         }
         @media print {
           html, body { margin: 0; padding: 0; }
-          @page { size: ${paperHeight}mm ${paperWidth}mm; margin: 0; }
+          @page { size: ${paperWidth}mm ${paperHeight}mm; margin: 0; }
         }
       </style>
     </head>
@@ -888,15 +881,13 @@ function generateChequeFormPositions(formType) {
   // === เช็ค BBL / UOB ===
   if (formType === 'BBL_CHQ' || formType === 'UOB_CHQ') {
     if (f.date && dateStr) {
-      // วันที่ในเช็ค: 8 ช่อง รวม 50mm (ช่องละ 6.25mm)
-      // แยกพิมพ์ทีละตัว ตัวเลขอยู่กึ่งกลางแต่ละช่อง
+      // วันที่ในเช็ค: 8 ช่อง รวม 50mm (ช่องละ 6.25mm) แนวนอน
       const dateDigits = dateStr.replace(/\//g, ''); // "15062569" (8 ตัว)
-      const totalWidth = 50; // mm รวมทั้งหมด
-      const charWidth = totalWidth / 8; // 6.25mm ต่อช่อง
+      const totalWidth = 50;
+      const charWidth = totalWidth / 8; // 6.25mm
       const dateTop = f.date.top + offsetTop + (fo.date_top||0);
       const dateLeft = f.date.left + offsetLeft + (fo.date_left||0);
       for (let i = 0; i < dateDigits.length && i < 8; i++) {
-        // กึ่งกลางช่อง = left + (i * charWidth) + (charWidth/2) แล้วชดเชยความกว้างตัวอักษร (~1.5mm)
         const centerOffset = (charWidth / 2) - 1.5;
         positions.push({ top: dateTop, left: dateLeft + (i * charWidth) + centerOffset, text: dateDigits[i] });
       }
