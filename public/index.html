@@ -3,6 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#1b5e20">
+  <link rel="manifest" href="/manifest.json">
   <title>Stock Cheque - Serial Factoring</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
@@ -241,13 +243,13 @@
       font-family: 'Courier New', monospace;
       font-size: 11px;
       line-height: 1.5;
-      white-space: pre;
       overflow-x: auto;
       background: #fff;
       border: 1.5px solid #c8e6c9;
       border-radius: var(--radius-sm);
       padding: 15px;
       min-height: 300px;
+      position: relative;
     }
 
     /* ===== Footer Tag ===== */
@@ -525,13 +527,6 @@
                     <label class="form-label form-label-sm">เลื่อนขวา (mm)</label>
                     <input type="number" id="ktb_offsetLeft" class="form-control form-control-sm" value="0" step="0.5">
                   </div>
-                  <div class="col-4 mb-2">
-                    <label class="form-label form-label-sm">แนวกระดาษ</label>
-                    <select id="ktb_orientation" class="form-select form-select-sm">
-                      <option value="portrait" selected>แนวตั้ง</option>
-                      <option value="landscape">แนวนอน</option>
-                    </select>
-                  </div>
                 </div>
                 <div class="row mt-2">
                   <div class="col-4 mb-2">
@@ -560,7 +555,7 @@
           <div class="col-lg-5">
             <div class="card">
               <div class="card-header bg-secondary text-white"><h6 class="mb-0"><i class="bi bi-file-text"></i> ตัวอย่าง KTB</h6></div>
-              <div class="card-body"><pre id="ktb_preview" class="payin-preview-box">กรอกข้อมูลแล้วกด "ดูตัวอย่าง"</pre></div>
+              <div class="card-body"><div id="ktb_preview" class="payin-preview-box">กรอกข้อมูลแล้วกด "ดูตัวอย่าง"</div></div>
             </div>
           </div>
         </div>
@@ -663,13 +658,6 @@
                     <label class="form-label form-label-sm">เลื่อนขวา (mm)</label>
                     <input type="number" id="uob_offsetLeft" class="form-control form-control-sm" value="0" step="0.5">
                   </div>
-                  <div class="col-4 mb-2">
-                    <label class="form-label form-label-sm">แนวกระดาษ</label>
-                    <select id="uob_orientation" class="form-select form-select-sm">
-                      <option value="portrait" selected>แนวตั้ง</option>
-                      <option value="landscape">แนวนอน</option>
-                    </select>
-                  </div>
                 </div>
                 <div class="row mt-2">
                   <div class="col-4 mb-2">
@@ -698,7 +686,7 @@
           <div class="col-lg-5">
             <div class="card">
               <div class="card-header bg-secondary text-white"><h6 class="mb-0"><i class="bi bi-file-text"></i> ตัวอย่าง UOB</h6></div>
-              <div class="card-body"><pre id="uob_preview" class="payin-preview-box">กรอกข้อมูลแล้วกด "ดูตัวอย่าง"</pre></div>
+              <div class="card-body"><div id="uob_preview" class="payin-preview-box">กรอกข้อมูลแล้วกด "ดูตัวอย่าง"</div></div>
             </div>
           </div>
         </div>
@@ -818,13 +806,6 @@
                     <label class="form-label form-label-sm">เลื่อนขวา (mm)</label>
                     <input type="number" id="bbl_offsetLeft" class="form-control form-control-sm" value="0" step="0.5">
                   </div>
-                  <div class="col-4 mb-2">
-                    <label class="form-label form-label-sm">แนวกระดาษ</label>
-                    <select id="bbl_orientation" class="form-select form-select-sm">
-                      <option value="portrait" selected>แนวตั้ง</option>
-                      <option value="landscape">แนวนอน</option>
-                    </select>
-                  </div>
                 </div>
                 <div class="row mt-2">
                   <div class="col-4 mb-2">
@@ -853,7 +834,7 @@
           <div class="col-lg-5">
             <div class="card">
               <div class="card-header bg-secondary text-white"><h6 class="mb-0"><i class="bi bi-file-text"></i> ตัวอย่าง BBL</h6></div>
-              <div class="card-body"><pre id="bbl_preview" class="payin-preview-box">กรอกข้อมูลแล้วกด "ดูตัวอย่าง"</pre></div>
+              <div class="card-body"><div id="bbl_preview" class="payin-preview-box">กรอกข้อมูลแล้วกด "ดูตัวอย่าง"</div></div>
             </div>
           </div>
         </div>
@@ -1214,22 +1195,31 @@
                   <label class="form-label form-label-sm">เลื่อนขวา (mm)</label>
                   <input type="number" id="printChqOffsetLeft" class="form-control form-control-sm" value="0" step="0.5">
                 </div>
-                <div class="col-4 mb-2">
-                  <label class="form-label form-label-sm">แนวกระดาษ</label>
-                  <select id="printChqOrientation" class="form-select form-select-sm">
-                    <option value="portrait" selected>แนวตั้ง (Portrait)</option>
-                    <option value="landscape">แนวนอน (Landscape)</option>
-                  </select>
-                </div>
               </div>
               <div class="row mt-2">
                 <div class="col-4 mb-2">
                   <label class="form-label form-label-sm">กว้างกระดาษ (mm)</label>
-                  <input type="number" id="printChqPageWidth" class="form-control form-control-sm" value="210" step="1">
+                  <input type="number" id="printChqPageWidth" class="form-control form-control-sm" value="173" step="1">
                 </div>
                 <div class="col-4 mb-2">
                   <label class="form-label form-label-sm">สูงกระดาษ (mm)</label>
-                  <input type="number" id="printChqPageHeight" class="form-control form-control-sm" value="76" step="1">
+                  <input type="number" id="printChqPageHeight" class="form-control form-control-sm" value="83" step="1">
+                </div>
+              </div>
+              <div class="row mt-2">
+                <div class="col-6 mb-2">
+                  <label class="form-label form-label-sm">ฟอนต์</label>
+                  <select id="printChqFont" class="form-select form-select-sm">
+                    <option value="Angsana New">Angsana New</option>
+                    <option value="AngsanaUPC">AngsanaUPC</option>
+                    <option value="TH SarabunPSK">TH SarabunPSK</option>
+                    <option value="Tahoma">Tahoma</option>
+                    <option value="Courier New">Courier New</option>
+                  </select>
+                </div>
+                <div class="col-6 mb-2">
+                  <label class="form-label form-label-sm">ขนาดฟอนต์ (pt)</label>
+                  <input type="number" id="printChqFontSize" class="form-control form-control-sm" value="20" step="1" min="8" max="36">
                 </div>
               </div>
             </div>
