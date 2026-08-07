@@ -1,4 +1,4 @@
-const API = '';
+const API = window.location.origin;
 
 let banks = [];
 
@@ -38,12 +38,14 @@ async function loadBanks() {
 
 // ============ TAB NAVIGATION ============
 
-function showTab(tab) {
+function showTab(tab, event) {
   document.querySelectorAll('[id^="tab-"]').forEach(el => el.style.display = 'none');
   document.getElementById(`tab-${tab}`).style.display = 'block';
 
   document.querySelectorAll('#mainTabs .nav-link').forEach(el => el.classList.remove('active'));
-  event.target.closest('.nav-link').classList.add('active');
+  if (event && event.target) {
+    event.target.closest('.nav-link').classList.add('active');
+  }
 
   if (tab === 'dashboard') loadStats();
   if (tab === 'cheques') loadCheques();
@@ -1643,12 +1645,14 @@ function openPayinAdjustment() {
 
 // ============ PAY-IN BANK TABS (KTB / UOB / BBL) ============
 
-function showPayinBankTab(bank) {
+function showPayinBankTab(bank, event) {
   document.querySelectorAll('.payin-bank-tab').forEach(el => el.style.display = 'none');
   document.getElementById(`payinTab-${bank}`).style.display = 'block';
 
   document.querySelectorAll('#payinBankTabs .nav-link').forEach(el => el.classList.remove('active'));
-  event.target.closest('.nav-link').classList.add('active');
+  if (event && event.target) {
+    event.target.closest('.nav-link').classList.add('active');
+  }
 }
 
 // === KTB Functions ===

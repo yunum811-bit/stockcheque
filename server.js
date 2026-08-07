@@ -7,7 +7,23 @@ const app = express();
 const PORT = process.env.PORT || 3003;
 const HOST = process.env.HOST || '0.0.0.0'; // รับ connection จากทุก IP ในวง LAN
 
-app.use(cors());
+const allowedOrigins = process.env.CORS_ORIGIN
+  ? process.env.CORS_ORIGIN.split(',').map(origin => origin.trim()).filter(Boolean)
+  : [];
+
+if (allowedOrigins.length > 0) {
+  app.use(cors({
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    }
+  }));
+} else {
+  app.use(cors());
+}
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -546,7 +562,6 @@ async function startServer() {
   await initDatabase();
   app.listen(PORT, HOST, () => {
     console.log(`Stock Cheque Server running on http://${HOST}:${PORT}`);
-    console.log(`LAN access: http://192.168.212.180:${PORT}`);
   });
 }
 
